@@ -1,36 +1,53 @@
 @import "tailwindcss";
 
 @theme {
-  /* 차트 색상 — Scope별 */
   --color-scope-1: #22c55e;
   --color-scope-2: #3b82f6;
   --color-scope-3: #f59e0b;
-
-  /* 애니메이션 */
-  --animate-fade-in: fadeIn 0.5s ease both;
-  --animate-slide-up: slideUp 0.4s ease both;
-
-  @keyframes fadeIn {
-    from { opacity: 0; }
-    to   { opacity: 1; }
-  }
-
-  @keyframes slideUp {
-    from { opacity: 0; transform: translateY(12px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
 }
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in { animation: fadeIn 0.5s ease both; }
+.animate-slide-up { animation: slideUp 0.4s ease both; }
 
 body {
   @apply bg-slate-50 text-slate-900 antialiased;
   font-family: -apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
 }
 
-/* 공통 카드 */
 .card {
   @apply bg-white border border-slate-200 rounded-xl shadow-sm;
 }
 
-/* 데이터 테이블 */
 .data-table th {
-  @apply bg-slate-50 text-sl
+  @apply bg-slate-50 text-slate-500 text-xs font-bold uppercase tracking-wider px-4 py-3 border-b border-slate-200;
+}
+
+.data-table td {
+  @apply px-4 py-3 text-sm text-slate-700 border-b border-slate-100;
+}
+
+.data-table tbody tr:hover td {
+  @apply bg-slate-50;
+}
+
+.data-table tbody tr:last-child td {
+  @apply border-b-0;
+}
+
+.data-table tfoot td {
+  @apply px-4 py-3 text-sm border-t border-slate-200;
+}
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { @apply bg-slate-100; }
+::-webkit-scrollbar-thumb { @apply bg-slate-300 rounded; }

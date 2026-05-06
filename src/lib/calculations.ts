@@ -1,4 +1,15 @@
-import { ActivityData, GHGScope, MonthlyEmission,DailyEmission,WeeklyEmission,YearlyEmission, ScopeBreakdown, ActivitySummary, ActivityType, BaseEmission } from './types'
+import { 
+  ActivityData, 
+  GHGScope, 
+  MonthlyEmission,
+  DailyEmission,
+  WeeklyEmission,
+  YearlyEmission, 
+  ScopeBreakdown, 
+  ActivitySummary, 
+  ActivityType, 
+  BaseEmission,
+} from './types'
 import { format } from 'date-fns'
 
 // ─────────────────────────────────────────
