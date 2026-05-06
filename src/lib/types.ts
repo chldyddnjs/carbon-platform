@@ -63,7 +63,7 @@ export interface EmissionFactor {
     isActive: boolean; //true면 현재 사용중, false면 이전 버전 (이력 보존)
     validFrom: Date; //이 버전이 적용되기 시작한 날짜
     validUntil: Date | null; //유효기간 null이면 유효기간 무제한
-    createAt: Date;
+    createdAt: Date;
 }
 
 /*
@@ -82,7 +82,7 @@ export interface ActivityData {
     scope:GHGScope; //자동 분류(ACTIVITY_SCOPE_MAP 기준)
     emissionFactor: number | null; //계산에 사용된 계수값 스냅샷
     emissionFactorId: string | null; //어떤 배출 계수를 썻는지 참조
-    calcualtedCO2e: number | null; //최종 결과: quantity x emissionFactor
+    calculatedCO2e: number | null; //최종 결과: quantity x emissionFactor
     createdAt: Date;
     updatedAt: Date;
 }
@@ -91,57 +91,21 @@ export interface ActivityData {
 // 집계/시각화용 타입 (API 응답 → 차트 입력)
 // ─────────────────────────────────────────
 
-//일별 배출량 집계 - 막대 차트에 사용
-//활동 유형별(electricity/rawMaterial/transport) Scope별 두 가지 뷰를 동시에 지원
-export interface DailyEmission {
-    date: string; // '2024-01-15' 형식
+export interface BaseEmission {
+    date: string;       // 날짜 형식은 문자열로 유지 (상세 형식은 주석 또는 타입으로 제어)
     electricity: number;
     rawMaterial: number;
     transport: number;
-    total: number; //세 가지 유형 합계
+    total: number;      // 유형별 합계
     scope1: number;
     scope2: number;
-    scope3: number;    
+    scope3: number;
 }
 
-//주별 배출량 집계 - 막대 차트에 사용
-//활동 유형별(electricity/rawMaterial/transport) Scope별 두 가지 뷰를 동시에 지원
-export interface WeeklyEmission {
-    week: string; // '2024-W01' 형식 (ISO 주차)
-    electricity: number;
-    rawMaterial: number;
-    transport: number;
-    total: number; //세 가지 유형 합계
-    scope1: number;
-    scope2: number;
-    scope3: number;    
-}
-
-//월별 배출량 집계 - 막대 차트에 사용
-//활동 유형별(electricity/rawMaterial/transport) Scope별 두 가지 뷰를 동시에 지원
-export interface MonthlyEmission {
-    month: string; // '2024-01' 형식
-    electricity: number;
-    rawMaterial: number;
-    transport: number;
-    total: number; //세 가지 유형 합계
-    scope1: number;
-    scope2: number;
-    scope3: number;    
-}
-
-//연도별 배출량 집계 - 막대 차트에 사용
-//활동 유형별(electricity/rawMaterial/transport) Scope별 두 가지 뷰를 동시에 지원
-export interface YearlyEmission {
-    year: string; // '2024' 형식
-    electricity: number;
-    rawMaterial: number;
-    transport: number;
-    total: number; //세 가지 유형 합계
-    scope1: number;
-    scope2: number;
-    scope3: number;    
-}
+export type DailyEmission = BaseEmission;
+export type WeeklyEmission = BaseEmission;
+export type MonthlyEmission = BaseEmission;
+export type YearlyEmission = BaseEmission;
 
 //Scop별 비중 - 도넛 차트에 사용
 //percentage를 미리 계산 넣는 이유:

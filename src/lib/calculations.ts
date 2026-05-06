@@ -1,5 +1,5 @@
-import { ActivityData, GHGScope, MonthlyEmission,DailyEmission,WeeklyEmission,YearlyEmission, ScopeBreakdown, ActivitySummary, ActivityType } from './types'
-import { format, startOfMonth } from 'date-fns'
+import { ActivityData, GHGScope, MonthlyEmission,DailyEmission,WeeklyEmission,YearlyEmission, ScopeBreakdown, ActivitySummary, ActivityType, BaseEmission } from './types'
+import { format } from 'date-fns'
 
 // ─────────────────────────────────────────
 // 기본 계산 함수
@@ -23,18 +23,25 @@ export function calculateScopeCO2e(data: ActivityData[], scope: GHGScope): numbe
 // 집계 함수 (차트/테이블용)
 // ─────────────────────────────────────────
 
-// 일별 배출량 집계
-export function getDailyEmissions(data: ActivityData[]): DailyEmission[] {
-  const dayMap = new Map<string, DailyEmission>()
+/**
+ * [공통] 기간별 배출량 집계 로직
+ * @param data 원본 활동 데이터 배열
+ * @param dateFormat 'yyyy-MM-dd', 'yyyy-WW', 'yyyy-MM', 'yyyy' 등 date-fns 포맷
+ */
+function getEmissionsByPeriod<T extends BaseEmission>(
+  data: ActivityData[],
+  dateFormat: string
+): T[] {
+  const periodMap = new Map<string, T>();
 
   for (const row of data) {
-    const d = row.date instanceof Date ? row.date : new Date(row.date)
-    const day = format(d, 'yyyy-MM-dd')
-    const co2e = row.calculatedCO2e ?? 0
+    const d = row.date instanceof Date ? row.date : new Date(row.date);
+    const periodKey = format(d, dateFormat);
+    const co2e = row.calculatedCO2e ?? 0;
 
-    if (!dayMap.has(day)) {
-      dayMap.set(day, {
-        day,
+    if (!periodMap.has(periodKey)) {
+      periodMap.set(periodKey, {
+        date: periodKey,
         electricity: 0,
         rawMaterial: 0,
         transport: 0,
@@ -42,152 +49,45 @@ export function getDailyEmissions(data: ActivityData[]): DailyEmission[] {
         scope1: 0,
         scope2: 0,
         scope3: 0,
-      })
+      } as unknown as T);
     }
 
-    const entry = dayMap.get(day)!
-
-    entry.total += co2e
-    if (row.activityType === 'electricity') entry.electricity += co2e
-    else if (row.activityType === 'raw_material') entry.rawMaterial += co2e
-    else if (row.activityType === 'transport') entry.transport += co2e
-
-    if (row.scope === 1) entry.scope1 += co2e
-    else if (row.scope === 2) entry.scope2 += co2e
-    else if (row.scope === 3) entry.scope3 += co2e
-  }
-
-  return Array.from(dayMap.values()).sort((a, b) =>
-    a.day.localeCompare(b.day)
-  )
-}
-
-// 주별 배출량 집계
-export function getWeeklyEmissions(data: ActivityData[]): WeeklyEmission[] {
-  const weekMap = new Map<string, WeeklyEmission>()
-
-  for (const row of data) {
-    const d = row.date instanceof Date ? row.date : new Date(row.date)
-    const week = format(d, 'yyyy-WW')
-    const co2e = row.calculatedCO2e ?? 0
-
-    if (!weekMap.has(week)) {
-      weekMap.set(week, {
-        week,
-        electricity: 0,
-        rawMaterial: 0,
-        transport: 0,
-        total: 0,
-        scope1: 0,
-        scope2: 0,
-        scope3: 0,
-      })
-    }
-
-    const entry = weekMap.get(week)!
-
-    entry.total += co2e
-    if (row.activityType === 'electricity') entry.electricity += co2e
-    else if (row.activityType === 'raw_material') entry.rawMaterial += co2e
-    else if (row.activityType === 'transport') entry.transport += co2e
-
-    if (row.scope === 1) entry.scope1 += co2e
-    else if (row.scope === 2) entry.scope2 += co2e
-    else if (row.scope === 3) entry.scope3 += co2e
-  }
-
-  return Array.from(weekMap.values()).sort((a, b) =>
-    a.week.localeCompare(b.week)
-  )
-}
-
-// 월별 배출량 집계
-// 활동 유형별(electricity/rawMaterial/transport)과
-// Scope별(scope1/scope2/scope3)을 동시에 집계
-// 이유: 차트에서 '활동 유형별 보기'와 'Scope별 보기' 두 모드를 지원하기 위해
-export function getMonthlyEmissions(data: ActivityData[]): MonthlyEmission[] {
-  // Map으로 월별로 그룹핑
-  // key: '2025-01' 형식 문자열
-  const monthMap = new Map<string, MonthlyEmission>()
-
-  for (const row of data) {
-    const d = row.date instanceof Date ? row.date : new Date(row.date)
-    // date-fns로 월의 첫날로 정규화 후 'yyyy-MM' 형식으로 변환
-    const month = format(startOfMonth(d), 'yyyy-MM')
-    const co2e = row.calculatedCO2e ?? 0
-
-    // 해당 월이 없으면 초기값 생성
-    if (!monthMap.has(month)) {
-      monthMap.set(month, {
-        month,
-        electricity: 0,
-        rawMaterial: 0,
-        transport: 0,
-        total: 0,
-        scope1: 0,
-        scope2: 0,
-        scope3: 0,
-      })
-    }
-
-    const entry = monthMap.get(month)!
+    const entry = periodMap.get(periodKey)!;
 
     // 활동 유형별 누적
-    entry.total += co2e
-    if (row.activityType === 'electricity') entry.electricity += co2e
-    else if (row.activityType === 'raw_material') entry.rawMaterial += co2e
-    else if (row.activityType === 'transport') entry.transport += co2e
+    entry.total += co2e;
+    if (row.activityType === 'electricity') entry.electricity += co2e;
+    else if (row.activityType === 'raw_material') entry.rawMaterial += co2e;
+    else if (row.activityType === 'transport') entry.transport += co2e;
 
     // Scope별 누적
-    if (row.scope === 1) entry.scope1 += co2e
-    else if (row.scope === 2) entry.scope2 += co2e
-    else if (row.scope === 3) entry.scope3 += co2e
+    if (row.scope === 1) entry.scope1 += co2e;
+    else if (row.scope === 2) entry.scope2 += co2e;
+    else if (row.scope === 3) entry.scope3 += co2e;
   }
 
-  // 월 기준 오름차순 정렬 후 배열로 반환
-  return Array.from(monthMap.values()).sort((a, b) =>
-    a.month.localeCompare(b.month)
-  )
+  // 날짜순 정렬 후 배열 반환
+  return Array.from(periodMap.values()).sort((a, b) =>
+    a.date.localeCompare(b.date)
+  );
 }
 
-//연도별 배출량 집계
-export function getYearlyEmissions(data: ActivityData[]): YearlyEmission[] {
-  const yearMap = new Map<string, YearlyEmission>()
+// 일별 배출량 집계
+export const getDailyEmissions = (data: ActivityData[]): DailyEmission[] => 
+  getEmissionsByPeriod(data, 'yyyy-MM-dd');
 
-  for (const row of data) {
-    const d = row.date instanceof Date ? row.date : new Date(row.date)
-    const year = format(d, 'yyyy')
-    const co2e = row.calculatedCO2e ?? 0
+// 주별 배출량 집계 (ISO 주차 기준)
+export const getWeeklyEmissions = (data: ActivityData[]): WeeklyEmission[] => 
+  getEmissionsByPeriod(data, 'yyyy-II'); // date-fns에서 ISO 주차는 II를 권장합니다.
 
-    if (!yearMap.has(year)) {
-      yearMap.set(year, {
-        year,
-        electricity: 0,
-        rawMaterial: 0,
-        transport: 0,
-        total: 0,
-        scope1: 0,
-        scope2: 0,
-        scope3: 0,
-      })
-    }
+// 월별 배출량 집계
+export const getMonthlyEmissions = (data: ActivityData[]): MonthlyEmission[] => 
+  getEmissionsByPeriod(data, 'yyyy-MM');
 
-    const entry = yearMap.get(year)!
+// 연도별 배출량 집계
+export const getYearlyEmissions = (data: ActivityData[]): YearlyEmission[] => 
+  getEmissionsByPeriod(data, 'yyyy');
 
-    entry.total += co2e
-    if (row.activityType === 'electricity') entry.electricity += co2e
-    else if (row.activityType === 'raw_material') entry.rawMaterial += co2e
-    else if (row.activityType === 'transport') entry.transport += co2e
-
-    if (row.scope === 1) entry.scope1 += co2e
-    else if (row.scope === 2) entry.scope2 += co2e
-    else if (row.scope === 3) entry.scope3 += co2e
-  }
-
-  return Array.from(yearMap.values()).sort((a, b) =>
-    a.year.localeCompare(b.year)
-  )
-}
 
 // Scope별 비중 계산 (도넛 차트용)
 // percentage를 미리 계산해서 넣는 이유:
@@ -258,23 +158,24 @@ export function getActivitySummary(data: ActivityData[]): ActivitySummary[] {
 // 유틸리티 함수
 // ─────────────────────────────────────────
 
-// 전월 대비 증감률 계산 (KPI 카드 트렌드 표시용)
-// 양수 = 증가(나쁨), 음수 = 감소(좋음)
-export function getMonthOverMonthChange(
-  monthly: MonthlyEmission[]
-): { month: string; change: number; changePercent: number }[] {
-  return monthly.map((m, i) => {
-    if (i === 0) return { month: m.month, change: 0, changePercent: 0 }
-    const prev = monthly[i - 1].total
-    const change = m.total - prev
-    const changePercent = prev > 0 ? (change / prev) * 100 : 0
-    return { month: m.month, change, changePercent }
-  })
+function getPeriodOverPeriodChange<T extends BaseEmission>(
+  data: T[],
+  labelKey: string // 'day', 'week', 'month', 'year' 등 결과 객체에 담을 키 이름
+) {
+  return data.map((curr, i) => {
+    const prevTotal = i === 0 ? 0 : data[i - 1].total;
+    const change = i === 0 ? 0 : curr.total - prevTotal;
+    const changePercent = prevTotal > 0 ? (change / prevTotal) * 100 : 0;
+
+    return {
+      [labelKey]: curr.date,
+      change,
+      changePercent,
+    };
+  });
 }
 
-// CO2e 값을 읽기 좋은 형식으로 변환
-// 1000 이상이면 tCO2e, 미만이면 kgCO2e로 표시
-export function formatCO2e(value: number, digits = 1): string {
-  if (value >= 1000) return `${(value / 1000).toFixed(digits)} tCO₂e`
-  return `${value.toFixed(digits)} kgCO₂e`
-}
+export const getDayOverDayChange = (daily: BaseEmission[]) => getPeriodOverPeriodChange(daily, 'day');
+export const getWeekOverWeekChange = (weekly: BaseEmission[]) => getPeriodOverPeriodChange(weekly, 'week');
+export const getMonthOverMonthChange = (monthly: BaseEmission[]) => getPeriodOverPeriodChange(monthly, 'month');
+export const getYearOverYearChange = (yearly: BaseEmission[]) => getPeriodOverPeriodChange(yearly, 'year');
