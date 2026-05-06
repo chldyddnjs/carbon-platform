@@ -1,36 +1,50 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+UI 설계 근거
+1. 대상 사용자가 두 명이다
+과제에서 실무자 + 경영자 둘 다를 대상으로 한다고 했습니다.
+사용자필요한 것UI 반영경영자숫자 크게, 트렌드 한눈에KPI 카드 4개, 전월 대비 증감률실무자데이터 상세 보기, 입력, 수정필터링 테이블, 데이터 입력 폼
 
-## Getting Started
+2. 페이지를 4개로 나눈 이유
+/                  대시보드     — 경영자가 제일 먼저 보는 화면
+/data-entry        데이터 입력  — 실무자가 매달 쓰는 화면
+/emission-factors  배출계수     — 담당자가 연 1회 업데이트하는 화면
+/import            파일 임포트  — 과거 데이터 한번에 올릴 때 쓰는 화면
+각 페이지가 하나의 역할만 하도록 나눴습니다. 한 페이지에 다 넣으면 경영자한테는 불필요한 입력 폼이 보이고, 실무자한테는 차트가 방해가 돼요.
 
-First, run the development server:
+3. 대시보드 컴포넌트 구성 이유
+KpiCard × 4        — 숫자 하나를 크게 보여주는 용도
+                     경영자는 보고서처럼 핵심 수치를 먼저 봄
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+MonthlyChart       — 월별 추이를 막대 차트로
+                     "이번 달이 왜 높냐"는 질문에 바로 답할 수 있어야 함
+                     활동 유형별 / Scope별 두 가지 뷰 지원
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+ScopeChart         — Scope 1/2/3 비중을 도넛 차트로
+                     탄소 회계에서 Scope 분류는 핵심 개념
+                     비전문가도 한눈에 보이도록 비중(%)을 같이 표시
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+ActivitySummaryTable — 어떤 활동이 가장 많이 기여하는지
+                       "뭘 줄여야 하냐"는 질문에 답하는 용도
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+RawDataTable       — 원본 데이터 전체 보기 + 삭제
+                     실무자가 잘못 입력한 데이터를 찾아서 지울 수 있어야 함
 
-## Learn More
+4. 다크 테마를 선택한 이유
+탄소 관리 플랫폼은 데이터 집중형 B2B SaaS입니다. 밝은 테마보다 다크 테마가 두 가지 이유로 적합해요.
+첫째, 차트와 숫자가 더 잘 보입니다. 어두운 배경에 밝은 색상의 차트가 대비가 높아서 가독성이 좋아요.
+둘째, B2B 대시보드의 관례입니다. Grafana, Datadog, AWS CloudWatch 등 데이터 대시보드는 대부분 다크 테마를 기본으로 씁니다.
 
-To learn more about Next.js, take a look at the following resources:
+5. Tailwind를 선택한 이유
+CSS를 별도 파일로 관리하면 컴포넌트와 스타일이 분리되어 있어서 수정할 때 두 파일을 왔다갔다해야 합니다. Tailwind는 컴포넌트 안에서 바로 스타일을 볼 수 있어서 빠르게 만들 때 효율적이에요.
+단, Recharts는 CSS 변수를 읽지 못하는 SVG 렌더링 특성 때문에 차트 색상만 colors.ts에 hex값으로 분리했습니다.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+이 내용 이해되셨으면 UI 작성 시작할게요. globals.css부터 갈까요?입력 내용: 이것을 readme에 올리는게 좋으려나?이것을 readme에 올리는게 좋으려나?오후 5:26Claude 응답: 네!네! README에 넣으면 좋습니다. 이유는 두 가지예요.
+첫째, 심사관이 코드 보기 전에 README를 먼저 읽습니다. "왜 이렇게 설계했냐"가 README에 있으면 코드를 보면서 "아, 그래서 이렇게 짰구나" 하고 이해가 빨라요.
+둘째, 발표 자료로도 쓸 수 있습니다. README에 정리해두면 발표 때 별도 자료 없이 GitHub 링크 하나로 설명할 수 있어요.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+지금 README.md가 create-next-app이 자동으로 만든 기본 내용일 텐데, 지금 바로 교체하는 것보다 UI 다 만들고 나서 README를 한번에 작성하는 게 낫습니다.
+이유는 지금 README를 쓰면 아직 안 만든 내용도 있고, UI 만들면서 설계가 바뀔 수도 있거든요. 나중에 전체 완성되면 그때 한번에 깔끔하게 정리하는 게 더 좋아요.
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+일단 메모 형식으로 지금까지 나온 내용을 README.md에 초안으로 남겨두는 건 어떨까요?
+bashgit add README.md
+git commit -m "docs: README 초안 작성 (UI 설계 근거, 시스템 구조)"
+UI 완성 후 보강하는 방식으로요. 진행할까요?
