@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 @theme {
-  /* 라이트/다크 공통 색상 */
+  /* 차트 색상 — Scope별 */
   --color-scope-1: #22c55e;
   --color-scope-2: #3b82f6;
   --color-scope-3: #f59e0b;
@@ -21,97 +21,16 @@
   }
 }
 
-/* ─────────────────────────────────────────
-   라이트 모드 (기본값)
-───────────────────────────────────────── */
-:root {
-  --bg-primary:    #f8fafc;
-  --bg-secondary:  #f1f5f9;
-  --bg-card:       #ffffff;
-  --bg-card-hover: #f8fafc;
-  --border:        #e2e8f0;
-  --border-light:  #cbd5e1;
-  --text-primary:  #0f172a;
-  --text-secondary:#475569;
-  --text-muted:    #94a3b8;
-  --accent-green:  #16a34a;
-  --accent-blue:   #2563eb;
-  --accent-amber:  #d97706;
-  --accent-red:    #dc2626;
-}
-
-/* ─────────────────────────────────────────
-   다크 모드
-───────────────────────────────────────── */
-.dark {
-  --bg-primary:    #0a0f0a;
-  --bg-secondary:  #0f1a0f;
-  --bg-card:       #111c11;
-  --bg-card-hover: #162216;
-  --border:        #1e331e;
-  --border-light:  #243d24;
-  --text-primary:  #e8f5e8;
-  --text-secondary:#8faa8f;
-  --text-muted:    #4a6a4a;
-  --accent-green:  #22c55e;
-  --accent-blue:   #3b82f6;
-  --accent-amber:  #f59e0b;
-  --accent-red:    #ef4444;
-}
-
-/* ─────────────────────────────────────────
-   기본 스타일
-───────────────────────────────────────── */
 body {
-  background-color: var(--bg-primary);
-  color: var(--text-primary);
+  @apply bg-slate-50 text-slate-900 antialiased;
   font-family: -apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
-  -webkit-font-smoothing: antialiased;
-  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* 공통 카드 */
 .card {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  transition: border-color 0.2s, background-color 0.3s;
+  @apply bg-white border border-slate-200 rounded-xl shadow-sm;
 }
 
 /* 데이터 테이블 */
 .data-table th {
-  background: var(--bg-secondary);
-  color: var(--text-muted);
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  padding: 10px 16px;
-  border-bottom: 1px solid var(--border);
-}
-
-.data-table td {
-  padding: 11px 16px;
-  border-bottom: 1px solid var(--border);
-  font-size: 0.875rem;
-  color: var(--text-primary);
-}
-
-.data-table tbody tr:hover td {
-  background: var(--bg-card-hover);
-}
-
-.data-table tbody tr:last-child td {
-  border-bottom: none;
-}
-
-.data-table tfoot td {
-  padding: 10px 16px;
-  font-size: 0.875rem;
-  border-top: 1px solid var(--border-light);
-}
-
-/* 스크롤바 */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: var(--bg-secondary); }
-::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 3px; }
+  @apply bg-slate-50 text-sl
