@@ -1,0 +1,76 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// 활동 데이터
+// 실제로 발생한 활동 1건 (전기 사용, 원소재 투입, 운송 등)
+model ActivityData {
+  id           String   @id @default(cuid())
+  date         DateTime
+  activityType String   // "electricity" | "raw_material" | "transport"
+  description  String   // "한국전력", "플라스틱 1", "트럭" 등
+  quantity     Float
+  unit         String
+  scope        Int      // GHG Scope 1, 2, 3
+
+  // 저장 시점의 배출계수 스냅샷
+  // 나중에 배출계수가 바뀌어도 당시 계산값은 변하지 않아야 함
+  emissionFactor   Float?
+  emissionFactorId String?
+  calculatedCO2e   Float?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // 배출계수와의 관계 (optional — 계수가 없어도 저장 가능)
+  emissionFactorRef EmissionFactor? @relation(fields: [emissionFactorId], references: [id])
+
+  @@map("activity_data")
+}
+
+// 배출계수
+// 버전 이력 관리가 핵심
+// 새 계수 등록 시 기존 계수는 isActive=false로 비활성화 (삭제 X)
+model EmissionFactor {
+  id          String   @id @default(cuid())
+  category    String   // "electricity" | "raw_material" | "transport"
+  subCategory String   // "한국전력", "플라스틱 1", "트럭" 등
+  factor      Float    // kgCO2e per unit
+  unit        String   // "kWh", "kg", "ton-km"
+  source      String   // 출처 (IPCC, 환경부 등)
+  version     Int      @default(1)
+  isActive    Boolean  @default(true)
+  validFrom   DateTime @default(now())
+  validUntil  DateTime?
+
+  createdAt DateTime @default(now())
+
+  activityData ActivityData[]
+
+  @@map("emission_factors")
+}
+
+// 제품별 탄소 발자국 (PCF) 집계
+// Scope별 배출량을 기간 단위로 집계한 결과
+model ProductCarbonFootprint {
+  id          String   @id @default(cuid())
+  productName String
+  periodStart DateTime
+  periodEnd   DateTime
+
+  scope1CO2e Float @default(0)
+  scope2CO2e Float @default(0)
+  scope3CO2e Float @default(0)
+  totalCO2e  Float @default(0)
+
+  unit        String   @default("kgCO2e")
+  calculatedAt DateTime @default(now())
+  createdAt   DateTime @default(now())
+
+  @@map("product_carbon_footprints")
+}
