@@ -79,6 +79,7 @@ export interface ActivityData {
     activityType: ActivityType;
     description: string; // 세부 항목 ('한국전력', '플라스틱 1' 등)
     quantity: number //활동량 (예: 100kWh, 50kg 등)
+    unit:string;
     scope:GHGScope; //자동 분류(ACTIVITY_SCOPE_MAP 기준)
     emissionFactor: number | null; //계산에 사용된 계수값 스냅샷
     emissionFactorId: string | null; //어떤 배출 계수를 썻는지 참조
