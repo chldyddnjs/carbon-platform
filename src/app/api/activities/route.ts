@@ -6,7 +6,7 @@ import { activitySchema } from './schema'
 // 전체 활동 데이터 목록 반환
 export async function GET() {
   try {
-    const data = getActivityData()
+    const data = await getActivityData()
     return NextResponse.json({ success: true, data })
   } catch (error) {
     return NextResponse.json(
@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
 
     // result.data는 이미 검증 + 변환된 값
     // date는 문자열 → Date로, quantity는 문자열 → number로 자동 변환됨
-    const added = addActivityData([result.data])
+    const added = await addActivityData([result.data])
 
     return NextResponse.json(
       { success: true, data: added[0] },
@@ -68,7 +68,7 @@ export async function DELETE(req: NextRequest) {
       )
     }
 
-    const deleted = deleteActivityData(id)
+    const deleted = await deleteActivityData(id)
 
     if (!deleted) {
       return NextResponse.json(

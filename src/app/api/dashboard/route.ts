@@ -23,7 +23,7 @@ export async function GET(req: NextRequest) {
         const { searchParams } = new URL(req.url)
         const period = searchParams.get('period') ?? 'monthly'
 
-        const data = getActivityData()
+        const data = await getActivityData()
         const selectedEmissions = 
             period === 'daily' ? getDailyEmissions(data) :
             period === 'weekly' ? getWeeklyEmissions(data) :
