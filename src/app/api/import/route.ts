@@ -81,7 +81,7 @@ export async function POST(req: NextRequest) {
     })
 
     // 유효한 행만 저장
-    const added = addActivityData(
+    const added = await addActivityData(
       validRows.map((r) => ({
         date: r.date,
         activityType: r.activityType as any,

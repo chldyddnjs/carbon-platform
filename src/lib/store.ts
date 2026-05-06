@@ -1,55 +1,5 @@
 import { prisma } from './db'
 import { ActivityData, ActivityType, EmissionFactor, ACTIVITY_SCOPE_MAP } from './types'
-import { DEFAULT_EMISSION_FACTORS, buildActivityData } from './seed-data'
-
-// ─────────────────────────────────────────
-// DB 초기화 (시드 데이터)
-// ─────────────────────────────────────────
-
-// DB가 비어있으면 과제 제공 기본 데이터를 자동으로 삽입
-// 이유: 처음 실행할 때 대시보드가 바로 데이터를 보여줘야 함
-export async function seedIfEmpty() {
-  const count = await prisma.emissionFactor.count()
-  if (count > 0) return // 이미 데이터가 있으면 건너뜀
-
-  // 배출계수 시드
-  for (const ef of DEFAULT_EMISSION_FACTORS) {
-    await prisma.emissionFactor.create({
-      data: {
-        id: ef.id,
-        category: ef.category,
-        subCategory: ef.subCategory,
-        factor: ef.factor,
-        unit: ef.unit,
-        source: ef.source,
-        version: ef.version,
-        isActive: ef.isActive,
-        validFrom: ef.validFrom,
-        validUntil: ef.validUntil,
-      },
-    })
-  }
-
-  // 활동 데이터 시드
-  const activityData = buildActivityData(DEFAULT_EMISSION_FACTORS)
-  for (const ad of activityData) {
-    await prisma.activityData.create({
-      data: {
-        id: ad.id,
-        date: ad.date,
-        activityType: ad.activityType,
-        description: ad.description,
-        quantity: ad.quantity,
-        unit: ad.unit,
-        scope: ad.scope,
-        emissionFactor: ad.emissionFactor,
-        emissionFactorId: ad.emissionFactorId,
-        calculatedCO2e: ad.calculatedCO2e,
-      },
-    })
-  }
-}
-
 // ─────────────────────────────────────────
 // 배출계수 관련 함수
 // ─────────────────────────────────────────
