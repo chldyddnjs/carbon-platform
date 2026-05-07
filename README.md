@@ -1,4 +1,4 @@
-# CarbonLens — 탄소 관리 플랫폼
+# Carbon-Platform — 탄소 관리 플랫폼
 
 > GHG Protocol 기반 제품 탄소 발자국(PCF)을 측정·관리하는 SaaS 플랫폼
 
