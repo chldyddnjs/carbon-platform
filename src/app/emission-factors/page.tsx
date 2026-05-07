@@ -53,6 +53,24 @@ export default function EmissionFactorsPage() {
     return e
   }
 
+  async function handleDelete(id: string) {
+    if (!confirm('이 배출계수를 삭제하시겠습니까?')) return
+    try{
+      const res = await fetch(API.emissionFactors.delete(id), { method: 'DELETE' })
+      const json = await res.json()
+      if (json.success) {
+        //목록 새로고침
+        const fresh = await fetch(API.emissionFactors.list())
+                            .then((r) => r.json())
+        if(fresh.success) setFactors(fresh.data)
+      } else {
+        alert('삭제 실패: ' + (json.error))
+      }
+    } catch(error) {
+      alert('네트워크 오류: ' + String(error))
+    }
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     const errs = validate()
@@ -236,11 +254,12 @@ export default function EmissionFactorsPage() {
               <tr>
                 <th className="text-left">카테고리</th>
                 <th className="text-left">세부 항목</th>
-                <th className="text-right">배출계수</th>
+                <th className="text-left">배출계수</th>
                 <th className="text-left">단위</th>
-                <th className="text-center">버전</th>
+                <th className="text-left">버전</th>
                 <th className="text-left">출처</th>
                 <th className="text-left">적용 시작일</th>
+                <th className='text-left'>삭제</th>
               </tr>
             </thead>
             <tbody>
@@ -258,9 +277,9 @@ export default function EmissionFactorsPage() {
                       </span>
                     </td>
                     <td className="font-medium text-slate-700">{f.subCategory}</td>
-                    <td className={`text-right font-mono font-bold ${c.text}`}>{f.factor}</td>
+                    <td className={`text-left font-mono font-bold ${c.text}`}>{f.factor}</td>
                     <td className="text-xs text-slate-400">kgCO₂e / {f.unit}</td>
-                    <td className="text-center">
+                    <td className="text-left">
                       <span className="text-xs font-mono px-1.5 py-0.5 rounded bg-green-50 text-green-700">
                         v{f.version}
                       </span>
@@ -268,6 +287,14 @@ export default function EmissionFactorsPage() {
                     <td className="text-xs text-slate-400 max-w-[200px] truncate">{f.source}</td>
                     <td className="text-xs font-mono text-slate-400">
                       {new Date(f.validFrom).toLocaleDateString('ko-KR')}
+                    </td>
+                    <td className="text-left">
+                      <button
+                        onClick={() => handleDelete(f.id)}
+                        className="text-xs px-2 py-1 rounded text-slate-400 hover:text-red-500 hover:bg-red-50 transition-all"
+                      >
+                        삭제
+                      </button>
                     </td>
                   </tr>
                 )
@@ -290,20 +317,29 @@ export default function EmissionFactorsPage() {
                 <tr>
                   <th className="text-left">카테고리</th>
                   <th className="text-left">세부 항목</th>
-                  <th className="text-right">배출계수</th>
-                  <th className="text-center">버전</th>
+                  <th className="text-left">배출계수</th>
+                  <th className="text-left">버전</th>
                   <th className="text-left">만료일</th>
+                  <th className="text-left">삭제</th>
                 </tr>
               </thead>
               <tbody>
                 {historyFactors.map((f) => (
                   <tr key={f.id} className="opacity-50">
-                    <td className="text-xs">{ACTIVITY_LABELS[f.category as ActivityType]}</td>
+                    <td className="text-xs text-left">{ACTIVITY_LABELS[f.category as ActivityType]}</td>
                     <td>{f.subCategory}</td>
-                    <td className="text-right font-mono text-xs">{f.factor}</td>
-                    <td className="text-center text-xs font-mono text-slate-400">v{f.version}</td>
-                    <td className="text-xs font-mono text-slate-400">
+                    <td className="text-left font-mono text-xs">{f.factor}</td>
+                    <td className="text-left text-xs font-mono text-slate-400">v{f.version}</td>
+                    <td className="text-xs text-left font-mono text-slate-400">
                       {f.validUntil ? new Date(f.validUntil).toLocaleDateString('ko-KR') : '—'}
+                    </td>
+                    <td>
+                      <button
+                        onClick={() => handleDelete(f.id)}
+                        className="text-xs text-left px-2 py-1 rounded text-slate-400 hover:text-red-500 hover:bg-red-50 transition-all"
+                      >
+                        삭제
+                      </button>
                     </td>
                   </tr>
                 ))}

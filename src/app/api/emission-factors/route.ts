@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getEmissionFactors, addEmissionFactor } from '@/lib/store'
 import { emissionFactorSchema } from './schema'
+import { prisma } from '@/lib/db'
 
 // GET /api/emission-factors
 // 전체 배출계수 반환 (활성 + 비활성 이력 모두 포함)
@@ -50,6 +51,50 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     return NextResponse.json(
       { success: false, error: '배출계수 저장에 실패했습니다.' },
+      { status: 500 }
+    )
+  }
+}
+
+
+// DELETE /api/emission-factors?id=xxx
+// 배출계수 삭제
+// 연결된 활동 데이터가 있으면 삭제 불가
+// 이유: 과거 데이터의 계산 근거가 사라지면 감사(audit) 추적 불가
+export async function DELETE(req: NextRequest) {
+  try {
+    const { searchParams } = new URL(req.url)
+    const id = searchParams.get('id')
+
+    if (!id) {
+      return NextResponse.json(
+        { success: false, error: 'ID가 필요합니다.' },
+        { status: 400 }
+      )
+    }
+
+    // 연결된 활동 데이터가 있는지 확인
+    const linkedCount = await prisma.activityData.count({
+      where: { emissionFactorId: id },
+    })
+
+    if (linkedCount > 0) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: `이 배출계수를 사용하는 활동 데이터가 ${linkedCount}건 있습니다. 먼저 활동 데이터를 삭제해주세요.`,
+        },
+        { status: 409 }
+      )
+    }
+
+    // 삭제 실행
+    await prisma.emissionFactor.delete({ where: { id } })
+
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    return NextResponse.json(
+      { success: false, error: '삭제에 실패했습니다.' },
       { status: 500 }
     )
   }
