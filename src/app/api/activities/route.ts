@@ -54,8 +54,6 @@ export async function POST(req: NextRequest) {
 
 // DELETE /api/activities?id=xxx
 // 활동 데이터 삭제
-// id를 query string으로 받는 이유:
-//   REST 관례상 DELETE는 body 없이 URL로 대상을 특정하는 것이 표준
 export async function DELETE(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url)
