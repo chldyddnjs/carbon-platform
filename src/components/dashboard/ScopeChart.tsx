@@ -99,10 +99,19 @@ export function ScopeChart({ data, totalCO2e }: ScopeChartProps) {
       </div>
 
       {/* GHG Protocol 설명 */}
-      <p className="mt-4 p-3 rounded-lg text-xs text-slate-500 leading-relaxed bg-slate-50 border border-slate-100">
-        <strong className="text-slate-600">GHG Protocol</strong>: 전력(Scope 2)과
-        원소재·운송(Scope 3)이 주요 배출원이며, 직접 연소(Scope 1)는 미등록 상태입니다.
-      </p>
+      <div className="mt-4 p-3 rounded-lg text-xs bg-slate-50 border border-slate-100">
+        <p className="font-semibold text-slate-600 mb-1">GHG Protocol</p>
+        <p className="text-slate-500 leading-relaxed">
+          온실가스 배출량을 세 가지 Scope로 분류하는 국제 표준 회계 기준입니다.
+        </p>
+        <div className="flex gap-3 mt-2">
+          <span className="text-slate-400">Scope 1 <span className="text-slate-500">직접 배출</span></span>
+          <span className="text-slate-300">·</span>
+          <span className="text-slate-400">Scope 2 <span className="text-slate-500">구매 전력</span></span>
+          <span className="text-slate-300">·</span>
+          <span className="text-slate-400">Scope 3 <span className="text-slate-500">공급망 전체</span></span>
+        </div>
+      </div>
     </div>
   )
 }

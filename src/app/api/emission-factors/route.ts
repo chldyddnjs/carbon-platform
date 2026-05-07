@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getEmissionFactors, addEmissionFactor } from '@/lib/store'
-import { emissionFactorSchema } from './schema'
+import { emissionFactorSchema } from '@/lib/schemas'
 import { prisma } from '@/lib/db'
 
 // GET /api/emission-factors
