@@ -9,16 +9,17 @@ export const API = {
 
   // 활동 데이터
   activities: {
-    list:      ()         => '/api/activities',
-    create:    ()         => '/api/activities',
-    delete:    (id: string) => `/api/activities?id=${id}`,
-    deleteAll: ()         => '/api/activities/all',
+    list: () => '/api/activities',
+    create: () => '/api/activities',
+    delete: (id: string) => `/api/activities?id=${id}`,
+    deleteAll: () => '/api/activities/all',
   },
 
   // 배출계수
   emissionFactors: {
     list:   () => '/api/emission-factors',
     create: () => '/api/emission-factors',
+    delete: (id:string) => `/api/emission-factors?id=${id}`
   },
 
   // 파일 임포트
