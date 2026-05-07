@@ -20,7 +20,7 @@ git clone https://github.com/your-username/carbon-platform.git && cd carbon-plat
 yarn install
 
 # 3. 환경변수 설정
-cp .env.example .env.local
+cp .env.example .env
 
 # 4. DB 실행 + 마이그레이션 + 시드
 docker-compose up -d db
@@ -97,18 +97,18 @@ src/
 ### 핵심 설계 결정
 
 #### 1. store.ts와 calculations.ts 분리
-store.ts        → 데이터를 어디서 가져오냐 (DB 레이어)
-calculations.ts → 어떻게 계산하냐 (순수 로직)
-DB를 교체해도 계산 로직은 그대로 재사용 가능합니다.
+<p>store.ts        → 데이터를 어디서 가져오냐 (DB 레이어)</p>
+<p>calculations.ts → 어떻게 계산하냐 (순수 로직)</p>
+<p>DB를 교체해도 계산 로직은 그대로 재사용 가능합니다.</p>
 
 #### 2. 배출계수 버전 이력 관리
-새 배출계수 등록 시 기존 계수를 삭제하지 않고 `isActive=false`로 비활성화합니다.
-이유: 과거 데이터가 당시 어떤 계수로 계산됐는지 감사(audit) 추적이 가능해야 함
+<p>새 배출계수 등록 시 기존 계수를 삭제하지 않고 `isActive=false`로 비활성화합니다.</p>
+<p>이유: 과거 데이터가 당시 어떤 계수로 계산됐는지 감사(audit) 추적이 가능해야 함</p>
 
 #### 3. xlsx 클라이언트 파싱
-xlsx 파일을 서버가 아닌 브라우저에서 파싱 후 JSON으로 전송합니다.
-이유: xlsx 라이브러리가 Next.js Edge Runtime과 호환되지 않음
-바이너리 파일 서버 전송 시 메모리 부담
+<p>xlsx 파일을 서버가 아닌 브라우저에서 파싱 후 JSON으로 전송합니다.</p>
+<p>이유: xlsx 라이브러리가 Next.js Edge Runtime과 호환되지 않음</p>
+<p>바이너리 파일 서버 전송 시 메모리 부담</p>
 
 #### 4. API 엔드포인트 중앙 관리
 ```typescript
@@ -171,11 +171,11 @@ URL 변경 시 한 곳만 수정하면 되고 TypeScript 자동완성으로 오�
 | Scope 3 | 기타 간접 (공급망) | 🏗️ 원소재 + 🚛 운송 |
 
 ### PCF 계산식
-배출량(kgCO₂e) = 활동량 × 배출계수
-전기:   kWh × 0.456 kgCO₂e/kWh  (한국전력공사 KEPCO 2024)
-원소재: kg  × {플라스틱1: 2.3, 플라스틱2: 3.2} kgCO₂e/kg (IPCC 2023)
-운송:   ton-km × 3.5 kgCO₂e/ton-km  (환경부 2024)
-총 PCF = Σ Scope1 + Σ Scope2 + Σ Scope3
+<p>배출량(kgCO₂e) = 활동량 × 배출계수</p>
+<p>전기:   kWh × 0.456 kgCO₂e/kWh  (한국전력공사 KEPCO 2024)</p>
+<p>원소재: kg  × {플라스틱1: 2.3, 플라스틱2: 3.2} kgCO₂e/kg (IPCC 2023)</p>
+<p>운송:   ton-km × 3.5 kgCO₂e/ton-km  (환경부 2024)</p>
+<p>총 PCF = Σ Scope1 + Σ Scope2 + Σ Scope3</p>
 
 ---
 
@@ -225,7 +225,8 @@ URL 변경 시 한 곳만 수정하면 되고 TypeScript 자동완성으로 오�
   - UI 설계
 - 클로드 코드로 작성한 결과물을 검토
   - 의존성: 꼭 필요한 라이브러리만 사용 중인가?
-  - 일관성:변수 명명 규칙 또는 코드 스타일이 일정한가?
+  - 일관성: 변수 명명 규칙 또는 코드 스타일이 일정한가?
+  - 확장성: 
   - 성능:불필요한 반복문이나 무거운 연산이 없는가?
    
 - 클로드 코드로 작성한 결과물을 수정
