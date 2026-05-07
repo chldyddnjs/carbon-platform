@@ -1,65 +1,130 @@
-import Image from "next/image";
+'use client'
 
-export default function Home() {
+import { useEffect, useState, useCallback } from 'react'
+import { KpiCard, PeriodTabs } from '@/components/dashboard/KpiCard'
+import { MonthlyChart } from '@/components/dashboard/MonthlyChart'
+import { ScopeChart } from '@/components/dashboard/ScopeChart'
+import { ActivitySummaryTable } from '@/components/dashboard/ActivitySummaryTable'
+import { RawDataTable } from '@/components/dashboard/RawDataTable'
+import { PeriodType } from '@/lib/types'
+
+export default function DashboardPage() {
+  const [data, setData]         = useState<any>(null)
+  const [loading, setLoading]   = useState(true)
+  const [error, setError]       = useState<string | null>(null)
+  const [period, setPeriod]     = useState<PeriodType>('month')
+  const [viewMode, setViewMode] = useState<'activity' | 'scope'>('activity')
+
+  const fetchData = useCallback(async () => {
+    try {
+      setLoading(true)
+      const res  = await fetch(`/api/dashboard?period=${period}`)
+      const json = await res.json()
+      if (!json.success) throw new Error(json.error)
+      setData(json.data)
+    } catch (e: any) {
+      setError(e.message || '데이터 로딩 실패')
+    } finally {
+      setLoading(false)
+    }
+  }, [period])
+
+  useEffect(() => { fetchData() }, [fetchData])
+
+  const handleDelete = useCallback(() => { fetchData() }, [fetchData])
+
+  if (error) return (
+    <div className="flex items-center justify-center min-h-[60vh]">
+      <p className="text-red-500">오류: {error}</p>
+    </div>
+  )
+
+  const { kpis, emissions, scopeBreakdown, activitySummary, rawData } = data ?? {}
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <div className="max-w-7xl mx-auto px-6 py-8">
+
+      {/* 헤더 */}
+      <div className="flex items-start justify-between mb-8">
+        <div>
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-xs px-2.5 py-0.5 rounded-full font-mono font-bold bg-green-50 text-green-700 border border-green-200">
+              사업장 CT-045
+            </span>
+            <span className="text-xs text-slate-400">컴퓨터 화면 제조 라인</span>
+          </div>
+          <h1 className="text-2xl font-bold text-slate-900">탄소 발자국 대시보드</h1>
+          <p className="text-sm text-slate-500 mt-1">
+            GHG Protocol 기반 제품 탄소 발자국(PCF) 전과정 데이터 시각화
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+        <PeriodTabs period={period} onChange={setPeriod} />
+      </div>
+
+      {loading ? (
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <div className="w-8 h-8 border-2 border-green-500 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+            <p className="text-sm text-slate-400">데이터 로딩 중…</p>
+          </div>
         </div>
-      </main>
+      ) : (
+        <>
+          {/* KPI 카드 */}
+          <div className="grid grid-cols-4 gap-4 mb-6">
+            <KpiCard
+              title="총 배출량"
+              value={`${((kpis?.totalCO2e ?? 0) / 1000).toFixed(3)} tCO₂e`}
+              subtitle={`${(kpis?.totalCO2e ?? 0).toFixed(1)} kgCO₂e`}
+              accentColor="border-green-500"
+            />
+            <KpiCard
+              title="Scope 2 (전력)"
+              value={`${(kpis?.scope2 ?? 0).toFixed(0)} kgCO₂e`}
+              subtitle="간접 배출 · 구매 전력"
+              accentColor="border-blue-500"
+            />
+            <KpiCard
+              title="Scope 3 (공급망)"
+              value={`${(kpis?.scope3 ?? 0).toFixed(0)} kgCO₂e`}
+              subtitle="원소재 + 운송"
+              accentColor="border-amber-500"
+            />
+            <KpiCard
+              title={`최근 ${period === 'day' ? '일' : period === 'week' ? '주' : period === 'month' ? '월' : '년'}`}
+              value={`${(kpis?.latestPeriod ?? 0).toFixed(0)} kgCO₂e`}
+              subtitle={kpis?.latestPeriodLabel ?? ''}
+              trend={{ value: kpis?.changePercent ?? 0, label: '전기간 대비' }}
+              accentColor="border-orange-500"
+            />
+          </div>
+
+          {/* 차트 */}
+          <div className="grid grid-cols-3 gap-4 mb-6">
+            <div className="col-span-2">
+              <MonthlyChart
+                data={emissions ?? []}
+                period={period}
+                viewMode={viewMode}
+                onViewModeChange={setViewMode}
+              />
+            </div>
+            <ScopeChart data={scopeBreakdown ?? []} totalCO2e={kpis?.totalCO2e ?? 0} />
+          </div>
+
+          {/* 요약 테이블 */}
+          <div className="mb-6">
+            <ActivitySummaryTable data={activitySummary ?? []} />
+          </div>
+
+          {/* 원본 데이터 */}
+          <RawDataTable data={rawData ?? []} onDelete={handleDelete} />
+
+          <p className="mt-6 text-center text-xs text-slate-400 border-t border-slate-100 pt-4">
+            배출계수 출처: 한국전력공사(KEPCO) · IPCC 2023 / ecoinvent 3.9 · 환경부 국가 온실가스 인벤토리 2024
+          </p>
+        </>
+      )}
     </div>
-  );
+  )
 }
