@@ -1,50 +1,269 @@
-UI 설계 근거
-1. 대상 사용자가 두 명이다
-과제에서 실무자 + 경영자 둘 다를 대상으로 한다고 했습니다.
-사용자필요한 것UI 반영경영자숫자 크게, 트렌드 한눈에KPI 카드 4개, 전월 대비 증감률실무자데이터 상세 보기, 입력, 수정필터링 테이블, 데이터 입력 폼
+# CarbonLens — 탄소 관리 플랫폼
 
-2. 페이지를 4개로 나눈 이유
-/                  대시보드     — 경영자가 제일 먼저 보는 화면
-/data-entry        데이터 입력  — 실무자가 매달 쓰는 화면
-/emission-factors  배출계수     — 담당자가 연 1회 업데이트하는 화면
-/import            파일 임포트  — 과거 데이터 한번에 올릴 때 쓰는 화면
-각 페이지가 하나의 역할만 하도록 나눴습니다. 한 페이지에 다 넣으면 경영자한테는 불필요한 입력 폼이 보이고, 실무자한테는 차트가 방해가 돼요.
+> GHG Protocol 기반 제품 탄소 발자국(PCF)을 측정·관리하는 SaaS 플랫폼
 
-3. 대시보드 컴포넌트 구성 이유
-KpiCard × 4        — 숫자 하나를 크게 보여주는 용도
-                     경영자는 보고서처럼 핵심 수치를 먼저 봄
+![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript)
+![Tailwind](https://img.shields.io/badge/Tailwind-4-38bdf8?logo=tailwindcss)
+![Prisma](https://img.shields.io/badge/Prisma-7-2D3748?logo=prisma)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791?logo=postgresql)
 
-MonthlyChart       — 월별 추이를 막대 차트로
-                     "이번 달이 왜 높냐"는 질문에 바로 답할 수 있어야 함
-                     활동 유형별 / Scope별 두 가지 뷰 지원
+---
 
-ScopeChart         — Scope 1/2/3 비중을 도넛 차트로
-                     탄소 회계에서 Scope 분류는 핵심 개념
-                     비전문가도 한눈에 보이도록 비중(%)을 같이 표시
+## 로컬 실행 (5단계)
 
-ActivitySummaryTable — 어떤 활동이 가장 많이 기여하는지
-                       "뭘 줄여야 하냐"는 질문에 답하는 용도
+```bash
+# 1. 레포지토리 클론
+git clone https://github.com/your-username/carbon-platform.git && cd carbon-platform
 
-RawDataTable       — 원본 데이터 전체 보기 + 삭제
-                     실무자가 잘못 입력한 데이터를 찾아서 지울 수 있어야 함
+# 2. 의존성 설치
+yarn install
 
-4. 다크 테마를 선택한 이유
-탄소 관리 플랫폼은 데이터 집중형 B2B SaaS입니다. 밝은 테마보다 다크 테마가 두 가지 이유로 적합해요.
-첫째, 차트와 숫자가 더 잘 보입니다. 어두운 배경에 밝은 색상의 차트가 대비가 높아서 가독성이 좋아요.
-둘째, B2B 대시보드의 관례입니다. Grafana, Datadog, AWS CloudWatch 등 데이터 대시보드는 대부분 다크 테마를 기본으로 씁니다.
+# 3. 환경변수 설정
+cp .env.example .env.local
 
-5. Tailwind를 선택한 이유
-CSS를 별도 파일로 관리하면 컴포넌트와 스타일이 분리되어 있어서 수정할 때 두 파일을 왔다갔다해야 합니다. Tailwind는 컴포넌트 안에서 바로 스타일을 볼 수 있어서 빠르게 만들 때 효율적이에요.
-단, Recharts는 CSS 변수를 읽지 못하는 SVG 렌더링 특성 때문에 차트 색상만 colors.ts에 hex값으로 분리했습니다.
+# 4. DB 실행 + 마이그레이션 + 시드
+docker-compose up -d db
+npx prisma migrate deploy && npm run seed
 
-이 내용 이해되셨으면 UI 작성 시작할게요. globals.css부터 갈까요?입력 내용: 이것을 readme에 올리는게 좋으려나?이것을 readme에 올리는게 좋으려나?오후 5:26Claude 응답: 네!네! README에 넣으면 좋습니다. 이유는 두 가지예요.
-첫째, 심사관이 코드 보기 전에 README를 먼저 읽습니다. "왜 이렇게 설계했냐"가 README에 있으면 코드를 보면서 "아, 그래서 이렇게 짰구나" 하고 이해가 빨라요.
-둘째, 발표 자료로도 쓸 수 있습니다. README에 정리해두면 발표 때 별도 자료 없이 GitHub 링크 하나로 설명할 수 있어요.
+# 5. 개발 서버 시작
+yarn dev
+```
 
-지금 README.md가 create-next-app이 자동으로 만든 기본 내용일 텐데, 지금 바로 교체하는 것보다 UI 다 만들고 나서 README를 한번에 작성하는 게 낫습니다.
-이유는 지금 README를 쓰면 아직 안 만든 내용도 있고, UI 만들면서 설계가 바뀔 수도 있거든요. 나중에 전체 완성되면 그때 한번에 깔끔하게 정리하는 게 더 좋아요.
+→ http://localhost:3000
 
-일단 메모 형식으로 지금까지 나온 내용을 README.md에 초안으로 남겨두는 건 어떨까요?
-bashgit add README.md
-git commit -m "docs: README 초안 작성 (UI 설계 근거, 시스템 구조)"
-UI 완성 후 보강하는 방식으로요. 진행할까요?
+---
+
+## Docker로 실행 (보너스)
+
+```bash
+docker-compose up --build
+```
+
+DB 실행 → 마이그레이션 → 시드 → 앱 시작까지 자동으로 처리됩니다.
+
+---
+
+## 올바른 사용 순서
+
+배출계수 등록 (/emission-factors) 또는 npm run seed
+활동 데이터 임포트 (/import) 또는 수동 입력 (/data-entry)
+대시보드 확인 (/)
+
+
+> 배출계수가 없으면 `calculatedCO2e = null`이 되어 차트에 데이터가 표시되지 않습니다.
+> 탄소 회계에서 배출량 = 활동량 × 배출계수이므로 배출계수가 반드시 먼저 등록되어야 합니다.
+
+---
+
+## 화면 구성
+
+| 경로 | 설명 | 대상 |
+|---|---|---|
+| `/` | 메인 대시보드 (KPI, 차트, 기간 필터) | 경영자 + 실무자 |
+| `/data-entry` | 활동 데이터 입력 | 실무자 |
+| `/emission-factors` | 배출계수 관리 (버전 이력) | 담당자 |
+| `/import` | Excel/CSV 파일 임포트 | 실무자 |
+
+---
+
+## 시스템 설계
+
+### 아키텍처
+src/
+├── app/
+│   ├── api/                # Next.js Route Handler (REST API)
+│   │   ├── dashboard/      # GET  — 대시보드 집계
+│   │   ├── activities/     # GET, POST, DELETE
+│   │   ├── emission-factors/ # GET, POST, DELETE
+│   │   └── import/         # POST — CSV/xlsx 임포트
+│   ├── data-entry/         # 데이터 입력 페이지
+│   ├── emission-factors/   # 배출계수 관리 페이지
+│   ├── import/             # 파일 임포트 페이지
+│   └── page.tsx            # 메인 대시보드
+├── components/
+│   ├── layout/             # Navigation
+│   └── dashboard/          # KpiCard, MonthlyChart, ScopeChart 등
+└── lib/
+├── types.ts            # 도메인 타입 (GHGScope, ActivityType 등)
+├── schemas.ts          # Zod 유효성 검사 스키마 (중앙 관리)
+├── calculations.ts     # PCF 계산 엔진 (일/주/월/년 집계)
+├── store.ts            # Prisma DB 레이어
+├── db.ts               # Prisma Client 싱글톤
+├── api.ts              # API 엔드포인트 중앙 관리
+└── colors.ts           # 차트 전용 색상 상수
+
+### 핵심 설계 결정
+
+#### 1. store.ts와 calculations.ts 분리
+store.ts        → 데이터를 어디서 가져오냐 (DB 레이어)
+calculations.ts → 어떻게 계산하냐 (순수 로직)
+DB를 교체해도 계산 로직은 그대로 재사용 가능합니다.
+
+#### 2. 배출계수 버전 이력 관리
+새 배출계수 등록 시 기존 계수를 삭제하지 않고 `isActive=false`로 비활성화합니다.
+이유: 과거 데이터가 당시 어떤 계수로 계산됐는지 감사(audit) 추적이 가능해야 함
+
+#### 3. xlsx 클라이언트 파싱
+xlsx 파일을 서버가 아닌 브라우저에서 파싱 후 JSON으로 전송합니다.
+이유: xlsx 라이브러리가 Next.js Edge Runtime과 호환되지 않음
+바이너리 파일 서버 전송 시 메모리 부담
+
+#### 4. API 엔드포인트 중앙 관리
+```typescript
+// src/lib/api.ts
+export const API = {
+  dashboard: (period: string) => `/api/dashboard?period=${period}`,
+  activities: {
+    list:      () => '/api/activities',
+    delete:    (id: string) => `/api/activities?id=${id}`,
+    deleteAll: () => '/api/activities/all',
+  },
+  ...
+} as const
+```
+URL 변경 시 한 곳만 수정하면 되고 TypeScript 자동완성으로 오타를 방지합니다.
+
+---
+
+## ERD
+┌──────────────────────┐      ┌──────────────────────────┐
+│   ActivityData       │      │   EmissionFactor         │
+├──────────────────────┤      ├──────────────────────────┤
+│ id           String  │      │ id           String      │
+│ date         DateTime│      │ category     String      │
+│ activityType String  │      │ subCategory  String      │
+│ description  String  │      │ factor       Float       │
+│ quantity     Float   │  ──► │ unit         String      │
+│ unit         String  │      │ source       String      │
+│ scope        Int     │      │ version      Int         │
+│ emissionFactor Float │      │ isActive     Boolean     │
+│ calculatedCO2e Float │      │ validFrom    DateTime    │
+│ createdAt    DateTime│      │ validUntil   DateTime?   │
+│ updatedAt    DateTime│      │ createdAt    DateTime    │
+└──────────────────────┘      └──────────────────────────┘
+┌────────────────────────────┐
+│   ProductCarbonFootprint   │
+├────────────────────────────┤
+│ id            String       │
+│ productName   String       │
+│ periodStart   DateTime     │
+│ periodEnd     DateTime     │
+│ scope1CO2e    Float        │
+│ scope2CO2e    Float        │
+│ scope3CO2e    Float        │
+│ totalCO2e     Float        │
+│ calculatedAt  DateTime     │
+└────────────────────────────┘
+
+---
+
+## GHG Scope 분류
+
+| Scope | 정의 | 이 플랫폼에서 |
+|---|---|---|
+| Scope 1 | 직접 배출 (자체 연소) | 미등록 |
+| Scope 2 | 간접 배출 (구매 전력) | ⚡ 전기 |
+| Scope 3 | 기타 간접 (공급망) | 🏗️ 원소재 + 🚛 운송 |
+
+### PCF 계산식
+배출량(kgCO₂e) = 활동량 × 배출계수
+전기:   kWh × 0.456 kgCO₂e/kWh  (한국전력공사 KEPCO 2024)
+원소재: kg  × {플라스틱1: 2.3, 플라스틱2: 3.2} kgCO₂e/kg (IPCC 2023)
+운송:   ton-km × 3.5 kgCO₂e/ton-km  (환경부 2024)
+총 PCF = Σ Scope1 + Σ Scope2 + Σ Scope3
+
+---
+
+## Trade-off
+
+| 결정 | 선택 | 이유 |
+|---|---|---|
+| DB 레이어 | Prisma v7 | 타입 자동 생성, schema.prisma가 ERD 역할 |
+| API 방식 | Next.js Route Handler | 별도 서버 없이 프론트와 한 프로젝트 관리 |
+| xlsx 파싱 | 클라이언트 | Edge Runtime 비호환, 메모리 부담 |
+| HTTP 클라이언트 | fetch | Next.js가 확장 제공, 별도 설치 불필요 |
+| 유효성 검사 | Zod | 스키마 하나로 검사·타입·에러 메시지 처리 |
+
+---
+
+## API 명세
+
+| Method | Endpoint | 설명 |
+|---|---|---|
+| GET | `/api/dashboard?period=month` | 대시보드 집계 (day/week/month/year) |
+| GET | `/api/activities` | 활동 데이터 목록 |
+| POST | `/api/activities` | 활동 데이터 추가 |
+| DELETE | `/api/activities?id=` | 활동 데이터 단건 삭제 |
+| DELETE | `/api/activities/all` | 활동 데이터 전체 삭제 |
+| GET | `/api/emission-factors` | 배출계수 목록 (이력 포함) |
+| POST | `/api/emission-factors` | 배출계수 등록 (버전 관리) |
+| DELETE | `/api/emission-factors?id=` | 배출계수 삭제 |
+| POST | `/api/import` | CSV 임포트 |
+| POST | `/api/import/json` | xlsx 파싱 결과 임포트 |
+
+---
+
+## 작업 소요 시간
+
+| 날짜 | 작업 내용 | 소요 시간 |
+|---|---|---|
+| 5/6 | 도메인 분석, 설계, 아키텍처 결정, DB 스키마, API 설계 | 약 8시간 |
+| 5/7 | UI 구현, 버그 수정, Docker 설정, README | 약 8시간 |
+| **합계** | | **약 16시간** |
+
+**가장 시간이 걸린 부분**
+- Prisma v7 설정 (v6과 설정 방식이 완전히 달라짐 — `prisma.config.ts` 도입)
+- Recharts CSS 변수 미지원 이슈 (`colors.ts`로 hex 상수 분리)
+- Next.js 서버/클라이언트 번들 분리 (`serverExternalPackages` 설정)
+
+---
+
+## AI 도구 사용 내역
+
+### 사용 도구
+- **Claude (Anthropic)** — 설계, 코드 작성, 디버깅 전 과정
+
+### 활용 방식
+Claude가 작성한 코드를 단순히 복붙하지 않고, 아래 방식으로 진행했습니다.
+
+1. **코드를 읽고 이해되지 않는 부분은 반드시 질문**
+   - "useCallback은 왜 사용한 거지?"
+   - "유효성 검사가 너무 하드코딩이야, Zod를 사용하면 좋겠어"
+
+2. **UI를 직접 보면서 개선점 판단**
+   - "삭제 버튼이 있는 게 좋을 것 같아"
+   - "설명 부분이 하드코딩이라 데이터 기반으로 바꿔야 할 것 같아"
+
+3. **공식 문서로 검증**
+   - Claude의 설명이 맞는지 Prisma, Next.js, Zod 공식 문서로 직접 확인
+
+### 주요 프롬프트 예시
+| 상황 | 프롬프트 |
+|---|---|
+| 설계 | "GHG Protocol 기준으로 전기/원소재/운송을 Scope 분류하는 TypeScript 타입 정의해줘" |
+| 리팩토링 | "유효성 검사가 너무 하드코딩이야, Zod로 바꿔줘" |
+| 디버깅 | "Recharts에서 CSS 변수가 안 먹히는 이유가 뭐야?" |
+| 학습 | "useCallback을 쓰는 게 좋을까 안 쓰는 게 좋을까? 차이는 없는 것 같아" |
+
+### AI가 생성한 코드 중 직접 수정한 부분
+- 배출계수 스키마 위치: API 폴더 → `lib/schemas.ts`로 통합
+- GHG Protocol 설명: 하드코딩 → 개념 설명으로 변경
+- 화살표 함수 vs 일반 함수 기준 정립 (컴포넌트 = 화살표, 로직 = 일반)
+- `handleDelete`, `handleDeleteAll`: useCallback 제거 → 일반 함수로 변경
+
+---
+
+## 기술 스택
+
+| 분류 | 기술 |
+|---|---|
+| Framework | Next.js 16 (App Router) |
+| Language | TypeScript 5 |
+| Styling | Tailwind CSS v4 |
+| Chart | Recharts |
+| ORM | Prisma v7 |
+| DB | PostgreSQL 16 |
+| Validation | Zod v4 |
+| File Parsing | xlsx (클라이언트) |
+| Container | Docker + Docker Compose |
