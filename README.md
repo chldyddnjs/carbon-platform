@@ -70,6 +70,7 @@ DB 실행 → 마이그레이션 → 시드 → 앱 시작까지 자동으로 �
 ## 시스템 설계
 
 ### 아키텍처
+```
 src/
 ├── app/
 │   ├── api/                # Next.js Route Handler (REST API)
@@ -92,7 +93,7 @@ src/
 ├── db.ts               # Prisma Client 싱글톤
 ├── api.ts              # API 엔드포인트 중앙 관리
 └── colors.ts           # 차트 전용 색상 상수
-
+```
 ### 핵심 설계 결정
 
 #### 1. store.ts와 calculations.ts 분리
@@ -127,6 +128,7 @@ URL 변경 시 한 곳만 수정하면 되고 TypeScript 자동완성으로 오�
 ---
 
 ## ERD
+```
 ┌──────────────────────┐      ┌──────────────────────────┐
 │   ActivityData       │      │   EmissionFactor         │
 ├──────────────────────┤      ├──────────────────────────┤
@@ -155,6 +157,8 @@ URL 변경 시 한 곳만 수정하면 되고 TypeScript 자동완성으로 오�
 │ totalCO2e     Float        │
 │ calculatedAt  DateTime     │
 └────────────────────────────┘
+```
+
 
 ---
 
@@ -213,9 +217,21 @@ URL 변경 시 한 곳만 수정하면 되고 TypeScript 자동완성으로 오�
 | **합계** | | **약 16시간** |
 
 **가장 시간이 걸린 부분**
-- Prisma v7 설정 (v6과 설정 방식이 완전히 달라짐 — `prisma.config.ts` 도입)
-- Recharts CSS 변수 미지원 이슈 (`colors.ts`로 hex 상수 분리)
-- Next.js 서버/클라이언트 번들 분리 (`serverExternalPackages` 설정)
+- 프로젝트 설계
+  - PCF 도메인 이해
+  - 프론트 데이터 설계
+  - 백엔드 데이터(ERD) 설계
+  - API 설계
+  - UI 설계
+- 클로드 코드로 작성한 결과물을 검토
+  - 의존성: 꼭 필요한 라이브러리만 사용 중인가?
+  - 일관성:변수 명명 규칙 또는 코드 스타일이 일정한가?
+  - 성능:불필요한 반복문이나 무거운 연산이 없는가?
+   
+- 클로드 코드로 작성한 결과물을 수정
+  - 문맥과 상관없는 코드 삭제
+  - 코드 구조 및 로직 최적화
+  - 중복 로직 통합
 
 ---
 
@@ -250,8 +266,7 @@ Claude가 작성한 코드를 단순히 복붙하지 않고, 아래 방식으로
 - 배출계수 스키마 위치: API 폴더 → `lib/schemas.ts`로 통합
 - GHG Protocol 설명: 하드코딩 → 개념 설명으로 변경
 - 화살표 함수 vs 일반 함수 기준 정립 (컴포넌트 = 화살표, 로직 = 일반)
-- `handleDelete`, `handleDeleteAll`: useCallback 제거 → 일반 함수로 변경
-
+- `handleDelete`, `handleDeleteAll`: useCallback 사용 -> useState로 사용시 데이터를 다루는 대시보드에서 무한 루프를 일으킬 가능성이 있음 
 ---
 
 ## 기술 스택
