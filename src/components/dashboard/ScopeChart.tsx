@@ -12,6 +12,7 @@ interface ScopeChartProps {
 const CustomTooltip = ({ active, payload }: any) => {
   if (!active || !payload?.length) return null
   const d = payload[0].payload as ScopeBreakdown
+  if (!d || !d.label) return null  // ← 이 줄 추가
   return (
     <div className="bg-white border border-slate-200 rounded-xl p-3 shadow-lg">
       <p className="text-xs font-bold mb-1" style={{ color: d.color }}>{d.label.replace('\n', ' ')}</p>
