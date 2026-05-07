@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { ActivityData } from '@/lib/types'
 import { format } from 'date-fns'
+import { API } from '@/lib/api'
 
 interface RawDataTableProps {
   data: ActivityData[]
@@ -49,7 +50,7 @@ export function RawDataTable({
     if (!onDeleteAll) return
     if (!confirm('모든 활동 데이터를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) return
     try {
-      const res = await fetch('/api/activities/all', { method: 'DELETE' })
+      const res = await fetch(API.activities.deleteAll(), { method: 'DELETE' })
       const json = await res.json()
       if (json.success) onDeleteAll()
       else alert('전체 삭제 실패: ' + (json.error || '알 수 없는 오류'))
@@ -63,7 +64,7 @@ export function RawDataTable({
     if (!confirm('이 항목을 삭제하시겠습니까?')) return
     setDeleting(id)
     try {
-      const res = await fetch(`/api/activities?id=${id}`, { method: 'DELETE' })
+      const res = await fetch(API.activities.delete(id), { method: 'DELETE' })
       const json = await res.json()
       if (json.success) onDelete(id)
       else alert('삭제 실패: ' + (json.error || '알 수 없는 오류'))

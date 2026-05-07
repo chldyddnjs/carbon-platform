@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useCallback } from 'react'
+import { API } from '@/lib/api'
 
 interface ImportResult {
   imported: number
@@ -129,7 +130,7 @@ export default function ImportPage() {
         rows = parseCsv(await file.text())
       }
 
-      const res  = await fetch('/api/import/json', {
+      const res  = await fetch(API.import.json(), {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify({ rows }),

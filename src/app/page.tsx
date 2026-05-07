@@ -7,6 +7,7 @@ import { ScopeChart } from '@/components/dashboard/ScopeChart'
 import { ActivitySummaryTable } from '@/components/dashboard/ActivitySummaryTable'
 import { RawDataTable } from '@/components/dashboard/RawDataTable'
 import { PeriodType } from '@/lib/types'
+import { API } from '@/lib/api'
 
 export default function DashboardPage() {
   const [data, setData]         = useState<any>(null)
@@ -18,7 +19,7 @@ export default function DashboardPage() {
   
   const fetchData = useCallback(async () => {
     try {
-      const res  = await fetch(`/api/dashboard?period=${period}`)
+      const res  = await fetch(API.dashboard(period))
       const json = await res.json()
       if (!json.success) throw new Error(json.error)
         setData(json.data)
