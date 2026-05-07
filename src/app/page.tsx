@@ -15,23 +15,31 @@ export default function DashboardPage() {
   const [period, setPeriod]     = useState<PeriodType>('month')
   const [viewMode, setViewMode] = useState<'activity' | 'scope'>('activity')
 
+  
   const fetchData = useCallback(async () => {
     try {
-      setLoading(true)
       const res  = await fetch(`/api/dashboard?period=${period}`)
       const json = await res.json()
       if (!json.success) throw new Error(json.error)
-      setData(json.data)
+        setData(json.data)
     } catch (e: any) {
       setError(e.message || '데이터 로딩 실패')
     } finally {
       setLoading(false)
     }
   }, [period])
-
+  
   useEffect(() => { fetchData() }, [fetchData])
+  
+  //무한 루프 방지
+  const handleDeleteAll = useCallback(() => {
+    fetchData()
+  },[fetchData])
 
-  const handleDelete = useCallback(() => { fetchData() }, [fetchData])
+  //무한 루프 방지
+  const handleDelete = useCallback(() => { 
+    fetchData()
+  },[fetchData])
 
   if (error) return (
     <div className="flex items-center justify-center min-h-[60vh]">
@@ -118,7 +126,11 @@ export default function DashboardPage() {
           </div>
 
           {/* 원본 데이터 */}
-          <RawDataTable data={rawData ?? []} onDelete={handleDelete} />
+          <RawDataTable 
+            data={rawData ?? []} 
+            onDelete={handleDelete}
+            onDeleteAll={handleDeleteAll}
+          />
 
           <p className="mt-6 text-center text-xs text-slate-400 border-t border-slate-100 pt-4">
             배출계수 출처: 한국전력공사(KEPCO) · IPCC 2023 / ecoinvent 3.9 · 환경부 국가 온실가스 인벤토리 2024

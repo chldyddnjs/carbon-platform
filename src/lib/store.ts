@@ -106,6 +106,17 @@ export async function addActivityData(
   return added
 }
 
+// 활동 데이터 전체 삭제
+
+export async function deleteAllActivityData(): Promise<boolean> {
+  try {
+    await prisma.activityData.deleteMany({})
+    return true
+  } catch {
+    return false
+  }
+}
+
 // 활동 데이터 삭제
 export async function deleteActivityData(id: string): Promise<boolean> {
   try {
