@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { addActivityData } from '@/lib/store'
-import { importRowSchema } from '../schema'
+import { importRowSchema } from '@/lib/schemas'
 import { ActivityType } from '@/lib/types'
 
 // POST /api/import/json

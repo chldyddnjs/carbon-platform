@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { EmissionFactor, ActivityType, ACTIVITY_LABELS } from '@/lib/types'
 import { API } from '@/lib/api'
-
+import { emissionFactorSchema } from '@/lib/schemas'
 const CATEGORY_COLORS: Record<ActivityType, { text: string; bg: string; border: string }> = {
   electricity:  { text: 'text-blue-700',   bg: 'bg-blue-50',   border: 'border-blue-200'  },
   raw_material: { text: 'text-amber-700',  bg: 'bg-amber-50',  border: 'border-amber-200' },
@@ -42,17 +42,6 @@ export default function EmissionFactorsPage() {
       .finally(() => setLoading(false))
   }, [])
 
-  function validate() {
-    const e: Record<string, string> = {}
-    if (!form.category)    e.category    = '카테고리를 선택해주세요.'
-    if (!form.subCategory) e.subCategory = '세부 항목을 입력해주세요.'
-    if (!form.factor || isNaN(Number(form.factor)) || Number(form.factor) <= 0) {
-      e.factor = '0보다 큰 숫자를 입력해주세요.'
-    }
-    if (!form.source) e.source = '출처를 입력해주세요.'
-    return e
-  }
-
   async function handleDelete(id: string) {
     if (!confirm('이 배출계수를 삭제하시겠습니까?')) return
     try{
@@ -73,28 +62,38 @@ export default function EmissionFactorsPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    const errs = validate()
-    setErrors(errs)
-    if (Object.keys(errs).length > 0) return
+    setErrors({})
+
+    // Zod로 유효성 검사
+    const result = emissionFactorSchema.safeParse({
+      category:    form.category,
+      subCategory: form.subCategory,
+      factor:      Number(form.factor),
+      unit:        form.unit,
+      source:      form.source,
+    })
+
+    if (!result.success) {
+      // Zod 에러를 필드별로 매핑
+      const fieldErrors: Record<string, string> = {}
+      result.error.issues.forEach((issue) => {
+        const field = issue.path[0] as string
+        fieldErrors[field] = issue.message
+      })
+      setErrors(fieldErrors)
+      return
+    }
 
     setSubmitting(true)
     try {
-      const res  = await fetch(API.emissionFactors.create(), {
+      const res = await fetch(API.emissionFactors.create(), {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          category:    form.category,
-          subCategory: form.subCategory,
-          factor:      Number(form.factor),
-          unit:        form.unit,
-          source:      form.source,
-        }),
+        body:    JSON.stringify(result.data),
       })
       const json = await res.json()
       if (json.success) {
-        // 목록 새로고침
-        const fresh = await fetch(API.emissionFactors.list())
-                            .then((r) => r.json())
+        const fresh = await fetch(API.emissionFactors.list()).then((r) => r.json())
         if (fresh.success) setFactors(fresh.data)
         setSuccess(`✓ "${form.subCategory}" 배출계수가 등록되었습니다.`)
         setShowForm(false)

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getActivityData, addActivityData, deleteActivityData } from '@/lib/store'
-import { activitySchema } from './schema'
+import { activitySchema } from '@/lib/schemas'
 
 // GET /api/activities
 // 전체 활동 데이터 목록 반환

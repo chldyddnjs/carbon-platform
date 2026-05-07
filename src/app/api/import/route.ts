@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { addActivityData } from '@/lib/store'
-import { importRowSchema } from './schema'
+import { importRowSchema } from '@/lib/schemas'
 
 // POST /api/import
 // CSV 파일 임포트
