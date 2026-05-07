@@ -47,7 +47,7 @@ export async function GET(req: NextRequest) {
 
     // 전기간 대비 증감률
     const lastChange = changes[changes.length - 1]
-    // const prevChange = changes[changes.length - 2]
+    const prevChange = changes[changes.length - 2]
 
     const kpis = {
       totalCO2e,

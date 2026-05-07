@@ -92,21 +92,29 @@ export interface ActivityData {
 // 집계/시각화용 타입 (API 응답 → 차트 입력)
 // ─────────────────────────────────────────
 
+// 기간별 집계 공통 베이스 타입
 export interface BaseEmission {
-    date: string;       // 날짜 형식은 문자열로 유지 (상세 형식은 주석 또는 타입으로 제어)
-    electricity: number;
-    rawMaterial: number;
-    transport: number;
-    total: number;      // 유형별 합계
-    scope1: number;
-    scope2: number;
-    scope3: number;
+  date: string
+  electricity: number
+  rawMaterial: number
+  transport: number
+  total: number
+  scope1: number
+  scope2: number
+  scope3: number
 }
 
-export type DailyEmission = BaseEmission;
-export type WeeklyEmission = BaseEmission;
-export type MonthlyEmission = BaseEmission;
-export type YearlyEmission = BaseEmission;
+// 일별 집계
+export interface DailyEmission extends BaseEmission {}
+
+// 주별 집계
+export interface WeeklyEmission extends BaseEmission {}
+
+// 월별 집계 (기존 MonthlyEmission 교체)
+export interface MonthlyEmission extends BaseEmission {}
+
+// 연별 집계
+export interface YearlyEmission extends BaseEmission {}
 
 //Scop별 비중 - 도넛 차트에 사용
 //percentage를 미리 계산 넣는 이유:
@@ -160,3 +168,12 @@ export const SCOPE_LABELS: Record<GHGScope,string> = {
     2: 'Scope2 (간접 배출)',
     3: 'Scope3 (기타 간접 배출)',
 }
+
+export type PeriodType = 'day' | 'week' | 'month' | 'year'
+
+export const PERIOD_LABELS: Record<PeriodType,string> = {
+    day: '일',
+    week: '주',
+    month: '월',
+    year: '년'
+} 
