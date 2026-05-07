@@ -3,10 +3,12 @@
 import { useState } from 'react'
 import { ActivityData } from '@/lib/types'
 import { format } from 'date-fns'
+import { API } from '@/lib/api'
 
 interface RawDataTableProps {
   data: ActivityData[]
   onDelete?: (id: string) => void
+  onDeleteAll?: () => void
 }
 
 const TYPE_LABELS: Record<string, string> = {
@@ -27,7 +29,11 @@ const SCOPE_COLORS: Record<number, { bg: string; color: string }> = {
   3: { bg: '#fffbeb', color: '#d97706' },
 }
 
-export function RawDataTable({ data, onDelete }: RawDataTableProps) {
+export function RawDataTable({ 
+  data, 
+  onDelete ,
+  onDeleteAll
+}: RawDataTableProps) {
   const [page, setPage]           = useState(1)
   const [filterType, setFilterType] = useState<string>('all')
   const [deleting, setDeleting]   = useState<string | null>(null)
@@ -40,12 +46,25 @@ export function RawDataTable({ data, onDelete }: RawDataTableProps) {
   const totalPages = Math.ceil(filtered.length / pageSize)
   const paged = filtered.slice((page - 1) * pageSize, page * pageSize)
 
+  async function handleDeleteAll() {
+    if (!onDeleteAll) return
+    if (!confirm('모든 활동 데이터를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) return
+    try {
+      const res = await fetch(API.activities.deleteAll(), { method: 'DELETE' })
+      const json = await res.json()
+      if (json.success) onDeleteAll()
+      else alert('전체 삭제 실패: ' + (json.error || '알 수 없는 오류'))
+    } catch (error) {
+      alert('네트워크 오류가 발생했습니다.')
+    }
+  }
+
   async function handleDelete(id: string) {
     if (!onDelete) return
     if (!confirm('이 항목을 삭제하시겠습니까?')) return
     setDeleting(id)
     try {
-      const res = await fetch(`/api/activities?id=${id}`, { method: 'DELETE' })
+      const res = await fetch(API.activities.delete(id), { method: 'DELETE' })
       const json = await res.json()
       if (json.success) onDelete(id)
       else alert('삭제 실패: ' + (json.error || '알 수 없는 오류'))
@@ -64,7 +83,7 @@ export function RawDataTable({ data, onDelete }: RawDataTableProps) {
           </p>
         </div>
 
-        {/* 필터 탭 */}
+        {/* 필터 탭 + 전체 삭제*/}
         <div className="flex gap-1.5">
           {['all', 'electricity', 'raw_material', 'transport'].map((type) => (
             <button
@@ -80,6 +99,15 @@ export function RawDataTable({ data, onDelete }: RawDataTableProps) {
             </button>
           ))}
         </div>
+        {/*전체 삭제 버튼*/}
+        {onDeleteAll && data.length > 0 && (
+          <button
+            onClick={handleDeleteAll}
+            className="px-3 py-1 rounded-lg text-xs font-medium text-red-500 border border-red-200 hover:bg-red-50 transition-all"
+          >
+            전체 삭제
+          </button>
+        )}
       </div>
 
       <div className="overflow-x-auto">

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { ActivityType, ACTIVITY_LABELS, ACTIVITY_SCOPE_MAP } from '@/lib/types'
+import { API } from '@/lib/api'
 
 interface FormData {
   date: string
@@ -93,7 +94,7 @@ export default function DataEntryPage() {
 
     setSubmitting(true)
     try {
-      const res = await fetch('/api/activities', {
+      const res = await fetch(API.activities.create(), {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

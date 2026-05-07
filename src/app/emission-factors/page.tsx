@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { EmissionFactor, ActivityType, ACTIVITY_LABELS } from '@/lib/types'
+import { API } from '@/lib/api'
 
 const CATEGORY_COLORS: Record<ActivityType, { text: string; bg: string; border: string }> = {
   electricity:  { text: 'text-blue-700',   bg: 'bg-blue-50',   border: 'border-blue-200'  },
@@ -60,7 +61,7 @@ export default function EmissionFactorsPage() {
 
     setSubmitting(true)
     try {
-      const res  = await fetch('/api/emission-factors', {
+      const res  = await fetch(API.emissionFactors.create(), {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -74,7 +75,8 @@ export default function EmissionFactorsPage() {
       const json = await res.json()
       if (json.success) {
         // 목록 새로고침
-        const fresh = await fetch('/api/emission-factors').then((r) => r.json())
+        const fresh = await fetch(API.emissionFactors.list())
+                            .then((r) => r.json())
         if (fresh.success) setFactors(fresh.data)
         setSuccess(`✓ "${form.subCategory}" 배출계수가 등록되었습니다.`)
         setShowForm(false)
