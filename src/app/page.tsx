@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { KpiCard, PeriodTabs } from '@/components/dashboard/KpiCard'
-import { MonthlyChart } from '@/components/dashboard/MonthlyChart'
+import { PeriodChart } from '@/components/dashboard/PeriodChart'
 import { ScopeChart } from '@/components/dashboard/ScopeChart'
 import { ActivitySummaryTable } from '@/components/dashboard/ActivitySummaryTable'
 import { RawDataTable } from '@/components/dashboard/RawDataTable'
@@ -111,7 +111,7 @@ export default function DashboardPage() {
           {/* 차트 */}
           <div className="grid grid-cols-3 gap-4 mb-6">
             <div className="col-span-2">
-              <MonthlyChart
+              <PeriodChart
                 data={emissions ?? []}
                 period={period}
                 viewMode={viewMode}

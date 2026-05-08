@@ -4,7 +4,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsive
 import { BaseEmission, PeriodType } from '@/lib/types'
 import { CHART_COLORS } from '@/lib/colors'
 
-interface MonthlyChartProps {
+interface PeriodChartProps {
   data: BaseEmission[]
   period: PeriodType
   viewMode: 'activity' | 'scope'
@@ -44,7 +44,12 @@ const PERIOD_FORMAT: Record<PeriodType, (date: string) => string> = {
   year:  (d) => d + '년',          // '2025년'
 }
 
-export function MonthlyChart({ data, period, viewMode, onViewModeChange }: MonthlyChartProps) {
+export function PeriodChart({ 
+  data, 
+  period, 
+  viewMode, 
+  onViewModeChange 
+}: PeriodChartProps) {
   const chartData = data.map((d) => ({
     ...d,
     label: PERIOD_FORMAT[period](d.date),

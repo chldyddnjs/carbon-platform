@@ -84,7 +84,7 @@ src/
 │   └── page.tsx            # 메인 대시보드
 ├── components/
 │   ├── layout/             # Navigation
-│   └── dashboard/          # KpiCard, MonthlyChart, ScopeChart 등
+│   └── dashboard/          # KpiCard, PeriodChart, ScopeChart 등
 └── lib/
 ├── types.ts            # 도메인 타입 (GHGScope, ActivityType 등)
 ├── schemas.ts          # Zod 유효성 검사 스키마 (중앙 관리)
@@ -128,6 +128,7 @@ URL 변경 시 한 곳만 수정하면 되고 TypeScript 자동완성으로 오�
 ---
 
 ## ERD
+
 ```
 ┌──────────────────────┐      ┌──────────────────────────┐
 │   ActivityData       │      │   EmissionFactor         │
@@ -144,19 +145,6 @@ URL 변경 시 한 곳만 수정하면 되고 TypeScript 자동완성으로 오�
 │ createdAt    DateTime│      │ validUntil   DateTime?   │
 │ updatedAt    DateTime│      │ createdAt    DateTime    │
 └──────────────────────┘      └──────────────────────────┘
-┌────────────────────────────┐
-│   ProductCarbonFootprint   │
-├────────────────────────────┤
-│ id            String       │
-│ productName   String       │
-│ periodStart   DateTime     │
-│ periodEnd     DateTime     │
-│ scope1CO2e    Float        │
-│ scope2CO2e    Float        │
-│ scope3CO2e    Float        │
-│ totalCO2e     Float        │
-│ calculatedAt  DateTime     │
-└────────────────────────────┘
 ```
 ---
 
@@ -178,7 +166,7 @@ URL 변경 시 한 곳만 수정하면 되고 TypeScript 자동완성으로 오�
 ---
 
 ## Trade-off
-
+```
 | 결정 | 선택 | 이유 |
 |---|---|---|
 | DB 레이어 | Prisma v7 | 타입 자동 생성, schema.prisma가 ERD 역할 |
@@ -186,11 +174,11 @@ URL 변경 시 한 곳만 수정하면 되고 TypeScript 자동완성으로 오�
 | xlsx 파싱 | 클라이언트 | Edge Runtime 비호환, 메모리 부담 |
 | HTTP 클라이언트 | fetch | Next.js가 확장 제공, 별도 설치 불필요 |
 | 유효성 검사 | Zod | 스키마 하나로 검사·타입·에러 메시지 처리 |
-
+```
 ---
 
 ## API 명세
-
+```
 | Method | Endpoint | 설명 |
 |---|---|---|
 | GET | `/api/dashboard?period=month` | 대시보드 집계 (day/week/month/year) |
@@ -203,11 +191,11 @@ URL 변경 시 한 곳만 수정하면 되고 TypeScript 자동완성으로 오�
 | DELETE | `/api/emission-factors?id=` | 배출계수 삭제 |
 | POST | `/api/import` | CSV 임포트 |
 | POST | `/api/import/json` | xlsx 파싱 결과 임포트 |
-
+```
 ---
 
 ## 작업 소요 시간
-
+```
 | 날짜 | 작업 내용 | 소요 시간 |
 |---|---|---|
 | 5/6 | 도메인 분석, 설계, 아키텍처 결정, DB 스키마, API 설계 | 약 8시간 |
@@ -243,6 +231,7 @@ URL 변경 시 한 곳만 수정하면 되고 TypeScript 자동완성으로 오�
 - **Gemini (GooGle)** - 코드어시스턴트
 
 ### 활용 방식
+```
 Claude가 작성한 코드를 단순히 복붙하지 않고, 아래 방식으로 진행했습니다.
 
 1. **생성된 코드를 읽고 이해되지 않는 부분은 반드시 질문** (Claude)
