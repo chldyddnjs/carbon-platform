@@ -53,23 +53,3 @@ model EmissionFactor {
 
   @@map("emission_factors")
 }
-
-// 제품별 탄소 발자국 (PCF) 집계
-// Scope별 배출량을 기간 단위로 집계한 결과
-model ProductCarbonFootprint {
-  id          String   @id @default(cuid())
-  productName String
-  periodStart DateTime
-  periodEnd   DateTime
-
-  scope1CO2e Float @default(0)
-  scope2CO2e Float @default(0)
-  scope3CO2e Float @default(0)
-  totalCO2e  Float @default(0)
-
-  unit        String   @default("kgCO2e")
-  calculatedAt DateTime @default(now())
-  createdAt   DateTime @default(now())
-
-  @@map("product_carbon_footprints")
-}

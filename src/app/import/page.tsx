@@ -2,6 +2,7 @@
 
 import { useState, useRef, useCallback } from 'react'
 import { API } from '@/lib/api'
+import Link from 'next/link'
 
 interface ImportResult {
   imported: number
@@ -165,6 +166,24 @@ export default function ImportPage() {
         </p>
       </div>
 
+      {/* 배출계수 등록 안내 */}
+      <div className="mb-6 px-4 py-3 rounded-xl text-sm bg-amber-50 border border-amber-200 flex items-start gap-3">
+        <span className="text-amber-500 text-lg shrink-0">⚠️</span>
+        <div>
+          <p className="font-semibold text-amber-700 mb-1">
+            파일 임포트 전에 배출계수를 먼저 등록해주세요.
+          </p>
+          <p className="text-amber-600 text-xs">
+            배출계수가 없으면 CO₂e가 계산되지 않아 대시보드 차트에 표시되지 않습니다.
+          </p>
+          <Link
+            href="/emission-factors"
+            className="inline-block mt-2 text-xs font-bold text-amber-700 underline hover:text-amber-800"
+          >
+            배출계수 관리 페이지로 이동 →
+          </Link>
+        </div>
+      </div>
       {/* 템플릿 다운로드 */}
       <div className="card p-4 mb-6 flex items-center justify-between">
         <div>

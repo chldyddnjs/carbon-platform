@@ -158,8 +158,6 @@ URL 변경 시 한 곳만 수정하면 되고 TypeScript 자동완성으로 오�
 │ calculatedAt  DateTime     │
 └────────────────────────────┘
 ```
-
-
 ---
 
 ## GHG Scope 분류
