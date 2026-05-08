@@ -70,29 +70,50 @@ DB 실행 → 마이그레이션 → 시드 → 앱 시작까지 자동으로 �
 ## 시스템 설계
 
 ### 아키텍처
+
 ```
 src/
 ├── app/
-│   ├── api/                # Next.js Route Handler (REST API)
-│   │   ├── dashboard/      # GET  — 대시보드 집계
-│   │   ├── activities/     # GET, POST, DELETE
-│   │   ├── emission-factors/ # GET, POST, DELETE
-│   │   └── import/         # POST — CSV/xlsx 임포트
-│   ├── data-entry/         # 데이터 입력 페이지
-│   ├── emission-factors/   # 배출계수 관리 페이지
-│   ├── import/             # 파일 임포트 페이지
-│   └── page.tsx            # 메인 대시보드
+│   ├── api/                    # Next.js Route Handle(REST API)
+│   │   ├── dashboard/          # GET  — 대시보드 집계
+│   │   ├── activities/         # GET, POST, DELETE
+│   │   ├── emission-factors/   # GET, POST, DELETE
+│   │   └── import/             # POST — CSV/xlsx 임포트
+│   ├── data-entry/             # 데이터 입력 페이지
+│   ├── emission-factors/       # 배출계수 관리 페이지
+│   ├── import/                 # 파일 임포트 페이지
+│   └── page.tsx                # 메인 대시보드
 ├── components/
-│   ├── layout/             # Navigation
-│   └── dashboard/          # KpiCard, PeriodChart, ScopeChart 등
+│   ├── layout/
+│   │   └── Navigation.tsx      # 공통 네비게이션
+│   ├── dashboard/              # 대시보드 전용 (도메인 의존)
+│   │   ├── KpiCard.tsx         # KPI 카드 + PeriodTabs
+│   │   ├── PeriodChart.tsx     # 기간별 배출량 차트
+│   │   ├── ScopeChart.tsx      # GHG Scope 도넛 차트
+│   │   ├── ActivitySummaryTable.tsx
+│   │   └── RawDataTable.tsx
+│   └── ui/                     # 범용 컴포넌트 (도메인 무관)
+│       ├── Badge.tsx
+│       ├── ErrorMessage.tsx
+│       ├── SuccessBanner.tsx
+│       ├── SectionHeader.tsx
+│       └── LoadingSpinner.tsx
 └── lib/
-├── types.ts            # 도메인 타입 (GHGScope, ActivityType 등)
-├── schemas.ts          # Zod 유효성 검사 스키마 (중앙 관리)
-├── calculations.ts     # PCF 계산 엔진 (일/주/월/년 집계)
-├── store.ts            # Prisma DB 레이어
-├── db.ts               # Prisma Client 싱글톤
-├── api.ts              # API 엔드포인트 중앙 관리
-└── colors.ts           # 차트 전용 색상 상수
+    ├── types.ts                # 도메인 타입 (GHGScope, ActivityType 등)
+    ├── schemas.ts              # Zod 스키마 중앙 관리
+    ├── calculations.ts         # PCF 계산 엔진
+    ├── store.ts                # Prisma DB 레이어
+    ├── db.ts                   # Prisma Client 싱글톤
+    ├── api.ts                  # API 엔드포인트 중앙 관리
+    └── colors.ts               # 차트 전용 색상 상수
+```
+
+#### KpiCard 재사용 예시
+```typescript
+// title, value, accentColor만 바꾸면 어떤 지표든 표시 가능
+<KpiCard title="총 배출량"    value="1.445 tCO₂e" accentColor="border-green-500" />
+<KpiCard title="Scope 2 (전력)" value="100 kgCO₂e"  accentColor="border-blue-500" />
+<KpiCard title="Scope 3 (공급망)" value="1345 kgCO₂e" accentColor="border-amber-500" />
 ```
 ### 핵심 설계 결정
 
@@ -203,24 +224,31 @@ URL 변경 시 한 곳만 수정하면 되고 TypeScript 자동완성으로 오�
 | **합계** | | **약 16시간** |
 
 **가장 시간이 걸린 부분**
-- 프로젝트 설계
-  - PCF 도메인 이해
-  - 프론트 데이터 설계
-  - 백엔드 데이터(ERD) 설계
-  - API 설계
-  - UI 설계
-- 클로드 코드로 작성한 결과물을 아래의 기준으로 검토
-  - 의존성: 꼭 필요한 라이브러리만 사용 중인가?
-  - 일관성: 변수 명명 규칙 또는 코드 스타일이 일정한가?
-  - 확장성: 유지보수가 쉬운가?
-  - 가독성: 읽기 쉬운 코드인가?
-  - 구조: 코드의 분리가 잘되어 있는가?
-  - 성능: 불필요한 반복문이나 무거운 연산이 없는가?
-   
-- 클로드 코드로 작성한 결과물을 수정
-  - 문맥과 상관없는 코드 삭제
-  - 코드 구조 및 로직 최적화
-  - 중복 로직 통합
+
+**1. 프로젝트 설계**
+- PCF 도메인 이해 (GHG Protocol, Scope 1/2/3, 배출계수 개념)
+- 프론트엔드 데이터 흐름 설계 (API 응답 → 차트 입력 타입 정의)
+- 백엔드 데이터 설계 (ERD — ActivityData, EmissionFactor 관계)
+- API 설계 (REST 엔드포인트 구조, 기간 필터 방식)
+- UI 설계 (경영자 vs 실무자 대상 화면 구성)
+
+**2. 생성된 코드 검토 기준**
+
+Claude가 작성한 코드를 그대로 사용하지 않고 아래 기준으로 검토했습니다:
+
+| 기준 | 검토 내용 |
+|---|---|
+| 의존성 | 꼭 필요한 라이브러리만 사용하는가 |
+| 일관성 | 변수 명명 규칙·코드 스타일이 일정한가 |
+| 확장성 | 나중에 기능을 추가하거나 수정하기 쉬운가 |
+| 가독성 | 다른 사람이 읽기 쉬운 코드인가 |
+| 구조 | 역할에 따라 코드가 적절히 분리되어 있는가 |
+| 성능 | 불필요한 반복문이나 무거운 연산이 없는가 |
+
+**3. 검토 후 수정한 내용**
+- 문맥과 무관한 코드 삭제 (사용하지 않는 `ProductCarbonFootprint` 모델 제거)
+- 코드 구조 최적화 (스키마 위치 통합, 엔드포인트 분리, 함수 스타일 통일)
+- 중복 로직 통합 (`components/ui/` 공통 컴포넌트 분리, `lib/api.ts` URL 중앙 관리)
 
 ---
 
@@ -234,22 +262,28 @@ URL 변경 시 한 곳만 수정하면 되고 TypeScript 자동완성으로 오�
 ```
 Claude가 작성한 코드를 단순히 복붙하지 않고, 아래 방식으로 진행했습니다.
 
-1. **생성된 코드를 읽고 이해되지 않는 부분은 반드시 질문** (Claude)
-   - "useCallback은 왜 사용한 거지"
-   - "유효성 검사가 너무 하드코딩, 따라서 Zod를 사용하여 가독성 및 유지보수의 장점을 가져옴"
+### 활용 방식
 
-3. **코드를 직접 보면서 개선점 판단** (Claude)
-   - "GHG Protocol을 설명하는 UI가 하드코딩으로 설명이 고정되어 있고 데이터를 이상하게 설명"
-   - "시계열 데이터를 (일/주/월/년)으로 그룹화하여 보여주고자 했지만, 클로드는 월 데이터만 화면에 렌더링하므로 추가기능 필요"
-   - "코드 대부분이 하드코딩이라 모듈 기반으로 분리"
-   - "CRUD를 진행하면 새로고침(리렌더링)을 진행하여, 주관적으로 주의가 분산되거나 방해를 받는 느낌"
+단순 코드 생성 도구로 사용하지 않고, 아래 방식으로 진행했습니다.
 
-4. **공식 문서로 검증** (Claude)
-   - Claude의 설명이 맞는지 Prisma, Next.js, Zod 공식 문서로 직접 확인
+**1. 생성된 코드를 읽고 이해되지 않는 부분은 반드시 질문**
+- `useCallback`의 필요성과 의존성 배열 동작 원리 파악
+- 유효성 검사 하드코딩 → Zod 스키마로 전환하여 가독성·유지보수성 향상
 
-5. **주석으로 작성할 함수의 기능을 정의** (Gemini)
-   - 코드 생산성 향상
-   - 오타 수정 및 변수명 네이밍에 용이함 
+**2. UI를 직접 보면서 개선점 직접 판단**
+- GHG Protocol 설명이 하드코딩으로 고정 → 개념 설명으로 변경
+- 월별 데이터만 표시 → 일/주/월/년 기간 필터 추가 요청
+- 대부분의 로직이 인라인 → 모듈 기반으로 분리 (`lib/calculations.ts`, `lib/store.ts`)
+- CRUD 후 전체 리렌더링으로 UX 방해 → 이전 데이터 유지하며 교체하는 방식으로 개선
+- 중복 UI 패턴 발견 → `components/ui/` 공통 컴포넌트로 분리
+
+**3. 공식 문서로 교차 검증**
+- Claude의 설명이 맞는지 Prisma, Next.js, Zod 공식 문서로 직접 확인
+- Prisma v7 breaking change는 공식 마이그레이션 가이드로 직접 해결
+
+**4. Gemini — 주석 기반 코드 생성**
+- 작성할 함수의 기능을 주석으로 먼저 정의 후 코드 생성
+- 오타 수정 및 변수명 네이밍 보조로 코드 생산성 향상
 
 ## 기술 스택
 
