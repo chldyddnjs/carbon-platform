@@ -70,6 +70,7 @@ DB 실행 → 마이그레이션 → 시드 → 앱 시작까지 자동으로 �
 ## 시스템 설계
 
 ### 아키텍처
+```
 src/
 ├── app/
 │   ├── api/                # Next.js Route Handler (REST API)
@@ -92,7 +93,7 @@ src/
 ├── db.ts               # Prisma Client 싱글톤
 ├── api.ts              # API 엔드포인트 중앙 관리
 └── colors.ts           # 차트 전용 색상 상수
-
+```
 ### 핵심 설계 결정
 
 #### 1. store.ts와 calculations.ts 분리
@@ -127,6 +128,7 @@ URL 변경 시 한 곳만 수정하면 되고 TypeScript 자동완성으로 오�
 ---
 
 ## ERD
+```
 ┌──────────────────────┐      ┌──────────────────────────┐
 │   ActivityData       │      │   EmissionFactor         │
 ├──────────────────────┤      ├──────────────────────────┤
@@ -155,7 +157,7 @@ URL 변경 시 한 곳만 수정하면 되고 TypeScript 자동완성으로 오�
 │ totalCO2e     Float        │
 │ calculatedAt  DateTime     │
 └────────────────────────────┘
-
+```
 ---
 
 ## GHG Scope 분류
