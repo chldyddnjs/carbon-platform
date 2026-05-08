@@ -3,6 +3,9 @@
 import { useState, useEffect } from 'react'
 import { ActivityType, ACTIVITY_LABELS, ACTIVITY_SCOPE_MAP } from '@/lib/types'
 import { API } from '@/lib/api'
+import { ErrorMessage } from '@/components/ui/ErrorMessage'
+import { SuccessBanner } from '@/components/ui/SuccessBanner'
+import { SectionHeader } from '@/components/ui/SectionHeader'
 
 interface FormData {
   date: string
@@ -133,16 +136,16 @@ export default function DataEntryPage() {
   return (
     <div className="max-w-2xl mx-auto px-6 py-8">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-900">활동 데이터 입력</h1>
-        <p className="text-sm text-slate-500 mt-1">
-          원소재·전기·운송 데이터를 입력하면 PCF가 자동으로 계산됩니다.
-        </p>
+        <SectionHeader
+          title="활동 데이터 입력"
+          subtitle="원소재·전기·운송 데이터를 입력하면 PCF가 자동으로 계산됩니다."
+        />
       </div>
 
       {/* 성공 메시지 */}
       {successMsg && (
         <div className="mb-4 px-4 py-3 rounded-xl text-sm font-medium bg-green-50 text-green-700 border border-green-200 animate-fade-in">
-          {successMsg}
+          {successMsg && <div className="mb-4"><SuccessBanner message={successMsg} /></div>}
         </div>
       )}
 
@@ -212,9 +215,7 @@ export default function DataEntryPage() {
                 focus:ring-2 focus:ring-green-200 focus:border-green-400
                 ${errors.date ? 'border-red-300 bg-red-50' : 'border-slate-200 bg-white'}`}
             />
-            {errors.date && (
-              <p className="mt-1.5 text-xs text-red-500">⚠ {errors.date}</p>
-            )}
+            {errors.date && <ErrorMessage message={errors.date} />}
           </div>
 
           {/* 설명 */}

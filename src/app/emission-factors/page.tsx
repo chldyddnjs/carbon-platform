@@ -4,6 +4,11 @@ import { useEffect, useState } from 'react'
 import { EmissionFactor, ActivityType, ACTIVITY_LABELS } from '@/lib/types'
 import { API } from '@/lib/api'
 import { emissionFactorSchema } from '@/lib/schemas'
+import { ErrorMessage } from '@/components/ui/ErrorMessage'
+import { SuccessBanner } from '@/components/ui/SuccessBanner'
+import { SectionHeader } from '@/components/ui/SectionHeader'
+import { Badge } from '@/components/ui/Badge'
+
 const CATEGORY_COLORS: Record<ActivityType, { text: string; bg: string; border: string }> = {
   electricity:  { text: 'text-blue-700',   bg: 'bg-blue-50',   border: 'border-blue-200'  },
   raw_material: { text: 'text-amber-700',  bg: 'bg-amber-50',  border: 'border-amber-200' },
@@ -115,9 +120,11 @@ export default function EmissionFactorsPage() {
 
       {/* 헤더 */}
       <div className="flex items-start justify-between mb-8">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">배출계수 관리</h1>
-          <p className="text-sm text-slate-500 mt-1">버전 이력이 추적되는 배출계수 라이브러리</p>
+        <div className="mb-8">
+          <SectionHeader
+            title="배출계수 관리"
+            subtitle="버전 이력이 추적되는 배출계수 라이브러리"
+          />
         </div>
         <button
           onClick={() => setShowForm((v) => !v)}
@@ -132,11 +139,7 @@ export default function EmissionFactorsPage() {
       </div>
 
       {/* 성공 메시지 */}
-      {success && (
-        <div className="mb-4 px-4 py-3 rounded-xl text-sm font-medium bg-green-50 text-green-700 border border-green-200">
-          {success}
-        </div>
-      )}
+      {success && <div className="mb-4"><SuccessBanner message={success} /></div>}
 
       {/* 새 배출계수 등록 폼 */}
       {showForm && (
@@ -171,7 +174,10 @@ export default function EmissionFactorsPage() {
                 )
               })}
             </div>
-            {errors.category && <p className="mt-1 text-xs text-red-500">⚠ {errors.category}</p>}
+            {errors.category && <ErrorMessage message={errors.category} />}
+            {errors.subCategory && <ErrorMessage message={errors.subCategory} />}
+            {errors.factor && <ErrorMessage message={errors.factor} />}
+            {errors.source && <ErrorMessage message={errors.source} />}
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -271,9 +277,10 @@ export default function EmissionFactorsPage() {
                 return (
                   <tr key={f.id}>
                     <td>
-                      <span className={`inline-block text-xs px-2 py-0.5 rounded-full font-semibold ${c.bg} ${c.text} border ${c.border}`}>
-                        {ACTIVITY_LABELS[f.category as ActivityType]}
-                      </span>
+                      <Badge
+                        label={ACTIVITY_LABELS[f.category as ActivityType]}
+                        color={f.category === 'electricity' ? 'blue' : f.category === 'raw_material' ? 'amber' : 'orange'}
+                      />
                     </td>
                     <td className="font-medium text-slate-700">{f.subCategory}</td>
                     <td className={`text-left font-mono font-bold ${c.text}`}>{f.factor}</td>

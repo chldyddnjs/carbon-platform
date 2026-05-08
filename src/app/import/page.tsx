@@ -3,6 +3,7 @@
 import { useState, useRef, useCallback } from 'react'
 import { API } from '@/lib/api'
 import Link from 'next/link'
+import { SectionHeader } from '@/components/ui/SectionHeader'
 
 interface ImportResult {
   imported: number
@@ -160,10 +161,10 @@ export default function ImportPage() {
   return (
     <div className="max-w-3xl mx-auto px-6 py-8">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-900">파일 임포트</h1>
-        <p className="text-sm text-slate-500 mt-1">
-          Excel(.xlsx) 또는 CSV 파일로 활동 데이터를 일괄 업로드합니다.
-        </p>
+        <SectionHeader
+          title="파일 임포트"
+          subtitle="Excel(.xlsx) 또는 CSV 파일로 활동 데이터를 일괄 업로드합니다."
+        />
       </div>
 
       {/* 배출계수 등록 안내 */}
