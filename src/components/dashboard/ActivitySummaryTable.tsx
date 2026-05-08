@@ -1,7 +1,7 @@
 'use client'
 
 import { ActivitySummary } from '@/lib/types'
-
+import { Badge } from '@/components/ui/Badge'
 interface ActivitySummaryTableProps {
   data: ActivitySummary[]
 }
@@ -59,9 +59,10 @@ export function ActivitySummaryTable({ data }: ActivitySummaryTableProps) {
                     </div>
                   </td>
                   <td>
-                    <span className={`inline-block text-xs px-2 py-0.5 rounded-full font-semibold ${badge.bg} ${badge.text}`}>
-                      {badge.label}
-                    </span>
+                    <Badge
+                      label={badge.label}
+                      color={item.type === 'electricity' ? 'blue' : 'amber'}
+                    />
                   </td>
                   <td className="text-right font-mono text-xs text-slate-500">
                     {item.totalQuantity.toLocaleString('ko-KR', { maximumFractionDigits: 1 })} {item.unit}

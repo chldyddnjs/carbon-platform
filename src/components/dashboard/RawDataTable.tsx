@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { ActivityData } from '@/lib/types'
 import { format } from 'date-fns'
 import { API } from '@/lib/api'
+import { Badge } from '@/components/ui/Badge'
 
 interface RawDataTableProps {
   data: ActivityData[]
@@ -140,12 +141,10 @@ export function RawDataTable({
                     {format(new Date(row.date), 'yyyy.MM.dd')}
                   </td>
                   <td>
-                    <span
-                      className="inline-block text-xs px-2 py-0.5 rounded-full font-semibold"
-                      style={{ background: `${typeColor}18`, color: typeColor }}
-                    >
-                      {TYPE_LABELS[row.activityType]}
-                    </span>
+                    <Badge
+                      label={TYPE_LABELS[row.activityType]}
+                      color={row.activityType === 'electricity' ? 'blue' : row.activityType === 'raw_material' ? 'amber' : 'orange'}
+                    />
                   </td>
                   <td className="text-slate-600">{row.description}</td>
                   <td className="text-right font-mono text-xs text-slate-500">

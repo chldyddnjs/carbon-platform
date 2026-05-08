@@ -8,6 +8,8 @@ import { ActivitySummaryTable } from '@/components/dashboard/ActivitySummaryTabl
 import { RawDataTable } from '@/components/dashboard/RawDataTable'
 import { PeriodType } from '@/lib/types'
 import { API } from '@/lib/api'
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
+import { SectionHeader } from '@/components/ui/SectionHeader'
 
 export default function DashboardPage() {
   const [data, setData]         = useState<any>(null)
@@ -56,27 +58,16 @@ export default function DashboardPage() {
       {/* 헤더 */}
       <div className="flex items-start justify-between mb-8">
         <div>
-          <div className="flex items-center gap-2 mb-2">
-            <span className="text-xs px-2.5 py-0.5 rounded-full font-mono font-bold bg-green-50 text-green-700 border border-green-200">
-              사업장 CT-045
-            </span>
-            <span className="text-xs text-slate-400">컴퓨터 화면 제조 라인</span>
-          </div>
-          <h1 className="text-2xl font-bold text-slate-900">탄소 발자국 대시보드</h1>
-          <p className="text-sm text-slate-500 mt-1">
-            GHG Protocol 기반 제품 탄소 발자국(PCF) 전과정 데이터 시각화
-          </p>
+          <SectionHeader
+            title="탄소 발자국 대시보드"
+            subtitle="GHG Protocol 기반 제품 탄소 발자국(PCF) 전과정 데이터 시각화"
+          />
         </div>
         <PeriodTabs period={period} onChange={setPeriod} />
       </div>
 
       {loading ? (
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="text-center">
-            <div className="w-8 h-8 border-2 border-green-500 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-            <p className="text-sm text-slate-400">데이터 로딩 중…</p>
-          </div>
-        </div>
+        <LoadingSpinner message="데이터 로딩 중…" />
       ) : (
         <>
           {/* KPI 카드 */}
